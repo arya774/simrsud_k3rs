@@ -19,12 +19,9 @@ class InspeksiController extends Controller
     */
     public function index()
     {
-        $inspeksis = Inspeksi::with([
-            'ruangan',
-            'kategori'
-        ])
-        ->latest()
-        ->get();
+        $inspeksis = Inspeksi::with('ruangan')
+            ->latest()
+            ->get();
 
         return view('inspeksi.index', [
             'kategori'   => Kategori::orderBy('id')->get(),
@@ -37,17 +34,14 @@ class InspeksiController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | RIWAYAT INSPEKSI
+    | HALAMAN RIWAYAT INSPEKSI
     |--------------------------------------------------------------------------
     */
     public function riwayat()
     {
-        $inspeksis = Inspeksi::with([
-            'ruangan',
-            'kategori'
-        ])
-        ->latest()
-        ->get();
+        $inspeksis = Inspeksi::with('ruangan')
+            ->latest()
+            ->get();
 
         return view('inspeksi.riwayat', compact('inspeksis'));
     }
@@ -71,8 +65,8 @@ class InspeksiController extends Controller
     {
         $request->validate([
             'tanggal'               => 'required|date',
-            'ruangan_id'            => 'required|exists:ruangans,id',
-            'kategori_id'           => 'required|exists:kategoris,id',
+            'ruangan_id'            => 'required',
+            'kategori_id'           => 'required',
             'jawaban'               => 'required|array',
             'nama_petugas_k3rs'     => 'nullable|string|max:255',
             'nama_petugas_ruangan'  => 'nullable|string|max:255',
@@ -82,8 +76,7 @@ class InspeksiController extends Controller
         DB::beginTransaction();
 
         try {
-
-            $jawaban = $request->jawaban ?? [];
+            $jawaban = $request->jawaban;
 
             $totalChecklist = count($jawaban);
 
@@ -97,7 +90,7 @@ class InspeksiController extends Controller
                 ? round(($jumlahBaik / $totalChecklist) * 100)
                 : 0;
 
-            $inspeksi = Inspeksi::create([
+            Inspeksi::create([
                 'tanggal'               => $request->tanggal,
                 'ruangan_id'            => $request->ruangan_id,
                 'kategori_id'           => $request->kategori_id,
@@ -117,35 +110,29 @@ class InspeksiController extends Controller
                 ->with('success', 'Inspeksi berhasil disimpan');
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
 
-            return redirect()
-                ->back()
+            return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', $e->getMessage());
         }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | DETAIL HASIL
+    | HASIL INSPEKSI
     |--------------------------------------------------------------------------
     */
     public function show($id)
     {
-        $inspeksi = Inspeksi::with([
-            'ruangan',
-            'kategori'
-        ])->findOrFail($id);
+        $inspeksi = Inspeksi::with('ruangan')
+            ->findOrFail($id);
 
         return view('inspeksi.hasil', [
             'inspeksi' => $inspeksi,
-
             'jawaban' => is_array($inspeksi->jawaban)
                 ? $inspeksi->jawaban
                 : json_decode($inspeksi->jawaban, true),
-
             'subUraian' => SubUraian::with('uraian')->get(),
         ]);
     }
@@ -163,7 +150,7 @@ class InspeksiController extends Controller
             'inspeksi'   => $inspeksi,
             'kategori'   => Kategori::all(),
             'uraian'     => Uraian::all(),
-            'subUraian'  => SubUraian::with('uraian')->get(),
+            'subUraian'  => SubUraian::all(),
             'ruangan'    => Ruangan::all(),
         ]);
     }
@@ -177,8 +164,8 @@ class InspeksiController extends Controller
     {
         $request->validate([
             'tanggal'     => 'required|date',
-            'ruangan_id'  => 'required|exists:ruangans,id',
-            'kategori_id' => 'required|exists:kategoris,id',
+            'ruangan_id'  => 'required',
+            'kategori_id' => 'required',
         ]);
 
         $inspeksi = Inspeksi::findOrFail($id);

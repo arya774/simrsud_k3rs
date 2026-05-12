@@ -9,65 +9,26 @@ class Inspeksi extends Model
 {
     use HasFactory;
 
-    /*
-    |--------------------------------------------------------------------------
-    | TABLE
-    |--------------------------------------------------------------------------
-    */
-
     protected $table = 'inspeksis';
 
-    /*
-    |--------------------------------------------------------------------------
-    | MASS ASSIGNMENT
-    |--------------------------------------------------------------------------
-    */
-
     protected $fillable = [
-
         'tanggal',
-
         'ruangan_id',
-
         'kategori_id',
-
         'keterangan',
-
         'nama_petugas_k3rs',
-
         'nama_petugas_ruangan',
-
         'ttd_k3rs',
-
         'ttd_ruangan',
-
         'jawaban',
-
         'hasil',
-
     ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | CASTING
-    |--------------------------------------------------------------------------
-    */
 
     protected $casts = [
-
         'tanggal' => 'date',
-
         'jawaban' => 'array',
-
-        'hasil' => 'integer',
-
+        'hasil'   => 'integer',
     ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONSHIP
-    |--------------------------------------------------------------------------
-    */
 
     public function ruangan()
     {
@@ -79,111 +40,57 @@ class Inspeksi extends Model
         return $this->belongsTo(Kategori::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESSOR PERSENTASE
-    |--------------------------------------------------------------------------
-    */
-
     public function getPersentaseAttribute()
     {
-        return $this->hasil . '%';
+        return ($this->hasil ?? 0) . '%';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESSOR STATUS
-    |--------------------------------------------------------------------------
-    */
 
     public function getStatusAttribute()
     {
-        if ($this->hasil >= 85) {
-            return 'Sangat Baik';
-        }
+        $hasil = (int) ($this->hasil ?? 0);
 
-        if ($this->hasil >= 70) {
-            return 'Baik';
-        }
-
-        if ($this->hasil >= 50) {
-            return 'Cukup';
-        }
-
-        return 'Kurang';
+        return match (true) {
+            $hasil >= 85 => 'Sangat Baik',
+            $hasil >= 70 => 'Baik',
+            $hasil >= 50 => 'Cukup',
+            default      => 'Kurang',
+        };
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESSOR BADGE COLOR
-    |--------------------------------------------------------------------------
-    */
 
     public function getBadgeAttribute()
     {
-        if ($this->hasil >= 85) {
-            return 'success';
-        }
+        $hasil = (int) ($this->hasil ?? 0);
 
-        if ($this->hasil >= 70) {
-            return 'primary';
-        }
-
-        if ($this->hasil >= 50) {
-            return 'warning';
-        }
-
-        return 'danger';
+        return match (true) {
+            $hasil >= 85 => 'success',
+            $hasil >= 70 => 'primary',
+            $hasil >= 50 => 'warning',
+            default      => 'danger',
+        };
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | TOTAL CHECKLIST
-    |--------------------------------------------------------------------------
-    */
 
     public function getTotalChecklistAttribute()
     {
-        return is_array($this->jawaban)
+        return is_array($this->jawaban ?? null)
             ? count($this->jawaban)
             : 0;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | TOTAL BAIK
-    |--------------------------------------------------------------------------
-    */
-
     public function getTotalBaikAttribute()
     {
-        if (!is_array($this->jawaban)) {
-            return 0;
-        }
+        if (!is_array($this->jawaban ?? null)) return 0;
 
         return collect($this->jawaban)
-            ->filter(function ($value) {
-                return $value === 'Baik';
-            })
+            ->filter(fn ($value) => $value === 'Baik')
             ->count();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | TOTAL TIDAK BAIK
-    |--------------------------------------------------------------------------
-    */
-
     public function getTotalTidakBaikAttribute()
     {
-        if (!is_array($this->jawaban)) {
-            return 0;
-        }
+        if (!is_array($this->jawaban ?? null)) return 0;
 
         return collect($this->jawaban)
-            ->filter(function ($value) {
-                return $value === 'Tidak Baik';
-            })
+            ->filter(fn ($value) => $value === 'Tidak Baik')
             ->count();
     }
 }

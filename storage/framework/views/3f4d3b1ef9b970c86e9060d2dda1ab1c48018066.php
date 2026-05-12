@@ -1,12 +1,12 @@
-@extends('layouts.dashboard.master')
 
-@section('title', 'Laporan Inspeksi')
 
-@section('content')
+<?php $__env->startSection('title', 'Laporan Inspeksi'); ?>
+
+<?php $__env->startSection('content'); ?>
 
 <div class="container-fluid">
 
-    {{-- PAGE TITLE --}}
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">Laporan Inspeksi</h2>
@@ -16,10 +16,10 @@
         </div>
     </div>
 
-    {{-- CARD FILTER --}}
+    
     <div class="card border-0 shadow-sm overflow-hidden mb-4">
 
-        {{-- HEADER CARD --}}
+        
         <div class="p-4 text-white"
              style="background: linear-gradient(90deg,#6c63ff,#6f4ef2);">
 
@@ -43,15 +43,15 @@
 
         </div>
 
-        {{-- BODY --}}
+        
         <div class="card-body">
 
             <form method="GET"
-                  action="{{ route('laporan.inspeksi') }}">
+                  action="<?php echo e(route('laporan.inspeksi')); ?>">
 
                 <div class="row">
 
-                    {{-- DARI --}}
+                    
                     <div class="col-md-3 mb-3">
 
                         <label class="form-label fw-semibold">
@@ -60,12 +60,12 @@
 
                         <input type="date"
                                name="dari"
-                               value="{{ request('dari') }}"
+                               value="<?php echo e(request('dari')); ?>"
                                class="form-control">
 
                     </div>
 
-                    {{-- SAMPAI --}}
+                    
                     <div class="col-md-3 mb-3">
 
                         <label class="form-label fw-semibold">
@@ -74,12 +74,12 @@
 
                         <input type="date"
                                name="sampai"
-                               value="{{ request('sampai') }}"
+                               value="<?php echo e(request('sampai')); ?>"
                                class="form-control">
 
                     </div>
 
-                    {{-- RUANGAN --}}
+                    
                     <div class="col-md-3 mb-3">
 
                         <label class="form-label fw-semibold">
@@ -93,22 +93,23 @@
                                 Semua
                             </option>
 
-                            @foreach($ruangan as $r)
+                            <?php $__currentLoopData = $ruangan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                                <option value="{{ $r->id }}"
-                                    {{ request('ruangan_id') == $r->id ? 'selected' : '' }}>
+                                <option value="<?php echo e($r->id); ?>"
+                                    <?php echo e(request('ruangan_id') == $r->id ? 'selected' : ''); ?>>
 
-                                    {{ $r->nama_ruangan }}
+                                    <?php echo e($r->nama_ruangan); ?>
+
 
                                 </option>
 
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                         </select>
 
                     </div>
 
-                    {{-- KATEGORI --}}
+                    
                     <div class="col-md-3 mb-3">
 
                         <label class="form-label fw-semibold">
@@ -122,16 +123,17 @@
                                 Semua
                             </option>
 
-                            @foreach($kategori as $k)
+                            <?php $__currentLoopData = $kategori; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                                <option value="{{ $k->id }}"
-                                    {{ request('kategori_id') == $k->id ? 'selected' : '' }}>
+                                <option value="<?php echo e($k->id); ?>"
+                                    <?php echo e(request('kategori_id') == $k->id ? 'selected' : ''); ?>>
 
-                                    {{ $k->nama_kategori }}
+                                    <?php echo e($k->nama_kategori); ?>
+
 
                                 </option>
 
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                         </select>
 
@@ -139,7 +141,7 @@
 
                 </div>
 
-                {{-- BUTTON --}}
+                
                 <div class="mt-2 d-flex gap-2">
 
                     <button type="submit"
@@ -151,7 +153,7 @@
 
                     </button>
 
-                    <a href="{{ route('laporan.inspeksi') }}"
+                    <a href="<?php echo e(route('laporan.inspeksi')); ?>"
                        class="btn btn-secondary">
 
                         <i class="fas fa-rotate-left"></i>
@@ -159,7 +161,7 @@
 
                     </a>
 
-                    <a href="{{ route('laporan.inspeksi.pdf', request()->all()) }}"
+                    <a href="<?php echo e(route('laporan.inspeksi.pdf', request()->all())); ?>"
                        class="btn btn-danger">
 
                         <i class="fas fa-file-pdf"></i>
@@ -175,7 +177,7 @@
 
     </div>
 
-    {{-- TABLE CARD --}}
+    
     <div class="card border-0 shadow-sm">
 
         <div class="card-body">
@@ -196,20 +198,23 @@
 
                     <tbody>
 
-                        @forelse($inspeksi as $i)
+                        <?php $__empty_1 = true; $__currentLoopData = $inspeksi; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
                         <tr>
 
                             <td>
-                                {{ $loop->iteration }}
+                                <?php echo e($loop->iteration); ?>
+
                             </td>
 
                             <td>
-                                {{ \Carbon\Carbon::parse($i->tanggal)->format('d-m-Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($i->tanggal)->format('d-m-Y')); ?>
+
                             </td>
 
                             <td>
-                                {{ $i->ruangan->nama_ruangan ?? '-' }}
+                                <?php echo e($i->ruangan->nama_ruangan ?? '-'); ?>
+
                             </td>
 
                             <td>
@@ -217,7 +222,8 @@
                                 <span class="badge rounded-pill"
                                       style="background:#6c63ff;">
 
-                                    {{ $i->kategori->nama_kategori ?? '-' }}
+                                    <?php echo e($i->kategori->nama_kategori ?? '-'); ?>
+
 
                                 </span>
 
@@ -227,7 +233,7 @@
 
                                 <span class="badge bg-success">
 
-                                    {{ $i->hasil ?? 0 }}%
+                                    <?php echo e($i->hasil ?? 0); ?>%
 
                                 </span>
 
@@ -235,7 +241,7 @@
 
                         </tr>
 
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                         <tr>
 
@@ -248,7 +254,7 @@
 
                         </tr>
 
-                        @endforelse
+                        <?php endif; ?>
 
                     </tbody>
 
@@ -262,4 +268,5 @@
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/laporan/inspeksi.blade.php ENDPATH**/ ?>

@@ -11,6 +11,7 @@ use App\Http\Controllers\SubUraianController;
 use App\Http\Controllers\RuanganController;
 
 use App\Http\Controllers\InspeksiController;
+use App\Http\Controllers\LaporanInspeksiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,13 +20,9 @@ use App\Http\Controllers\InspeksiController;
 */
 Route::middleware('guest')->group(function () {
 
-    Route::get('/login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
-
-    Route::post('/login', [AuthenticatedSessionController::class, 'store'])
-        ->name('login.store');
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -34,22 +31,9 @@ Route::middleware('guest')->group(function () {
 */
 Route::middleware('auth')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | ROOT
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/', function () {
-        return redirect()->route('dashboard');
-    });
+    Route::get('/', fn () => redirect()->route('dashboard'));
 
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /*
     |--------------------------------------------------------------------------
@@ -62,7 +46,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('uraian', UraianController::class);
         Route::resource('sub-uraian', SubUraianController::class);
         Route::resource('ruangan', RuanganController::class);
-
     });
 
     /*
@@ -72,35 +55,35 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('inspeksi')->name('inspeksi.')->group(function () {
 
-        // FORM
-        Route::get('/', [InspeksiController::class, 'index'])
-            ->name('index');
+        Route::get('/', [InspeksiController::class, 'index'])->name('index');
+        Route::get('/create', [InspeksiController::class, 'create'])->name('create');
+        Route::post('/store', [InspeksiController::class, 'store'])->name('store');
 
-        Route::get('/create', [InspeksiController::class, 'create'])
-            ->name('create');
+        Route::get('/riwayat', [InspeksiController::class, 'riwayat'])->name('riwayat');
 
-        Route::post('/store', [InspeksiController::class, 'store'])
-            ->name('store');
+        Route::get('/{inspeksi}/hasil', [InspeksiController::class, 'show'])->name('hasil');
 
-        // RIWAYAT (FIX)
-        Route::get('/riwayat', [InspeksiController::class, 'riwayat'])
-            ->name('riwayat');
+        Route::get('/{inspeksi}/edit', [InspeksiController::class, 'edit'])->name('edit');
 
-        // HASIL
-        Route::get('/{inspeksi}/hasil', [InspeksiController::class, 'show'])
-            ->name('hasil');
+        Route::put('/{inspeksi}', [InspeksiController::class, 'update'])->name('update');
 
-        // EDIT
-        Route::get('/{inspeksi}/edit', [InspeksiController::class, 'edit'])
-            ->name('edit');
+        Route::delete('/{inspeksi}', [InspeksiController::class, 'destroy'])->name('destroy');
+    });
 
-        // UPDATE
-        Route::put('/{inspeksi}', [InspeksiController::class, 'update'])
-            ->name('update');
+    /*
+    |--------------------------------------------------------------------------
+    | LAPORAN INSPEKSI (FINAL FIXED)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('laporan')->name('laporan.')->group(function () {
 
-        // DELETE
-        Route::delete('/{inspeksi}', [InspeksiController::class, 'destroy'])
-            ->name('destroy');
+        // halaman laporan
+        Route::get('/inspeksi', [LaporanInspeksiController::class, 'index'])
+            ->name('inspeksi');
+
+        // PDF EXPORT (INI WAJIB SAMA DENGAN CONTROLLER)
+        Route::get('/inspeksi/pdf', [LaporanInspeksiController::class, 'pdf'])
+            ->name('inspeksi.pdf');
     });
 
     /*
@@ -108,10 +91,8 @@ Route::middleware('auth')->group(function () {
     | LOGOUT
     |--------------------------------------------------------------------------
     */
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
-
 
 /*
 |--------------------------------------------------------------------------
