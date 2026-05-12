@@ -6,4 +6,4 @@
 <link rel="stylesheet" type="text/css" href="<?php echo e(asset('assets/css/style.css')); ?>">
 <link rel="stylesheet" type="text/css" href="<?php echo e(asset('assets/css/responsive.css')); ?>">
 <link rel="stylesheet" type="text/css" href="<?php echo e(asset('assets/vendors/aos/aos.css')); ?>">
-<?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/layouts/dashboard/css.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/layouts/dashboard/css.blade.php ENDPATH**/ ?>

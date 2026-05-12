@@ -1,14 +1,12 @@
-
-
-<?php $__env->startSection('title', 'Data Kategori'); ?>
+<?php $__env->startSection('title', 'Data Sub Uraian'); ?>
 
 <?php $__env->startSection('breadcrumb-title'); ?>
-<h3 class="fw-bold">Data Kategori</h3>
+<h3 class="fw-bold">Data Sub Uraian</h3>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('breadcrumb-items'); ?>
 <li class="breadcrumb-item">Master Data</li>
-<li class="breadcrumb-item active">Kategori</li>
+<li class="breadcrumb-item active">Sub Uraian</li>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -99,6 +97,8 @@
         border:none !important;
         vertical-align:middle;
         padding:20px 18px;
+        color:#0f172a;
+        font-weight:600;
     }
 
     .number-badge{
@@ -113,7 +113,7 @@
         font-weight:700;
     }
 
-    .kategori-title{
+    .sub-title{
         font-size:16px;
         font-weight:700;
         color:#0f172a;
@@ -183,10 +183,6 @@
         border-color:#4f46e5;
     }
 
-    .empty-state img{
-        opacity:0.7;
-    }
-
     @media(max-width:768px){
 
         .header-gradient{
@@ -218,27 +214,26 @@
 
     <div class="main-card">
 
-        <!-- HEADER -->
         <div class="header-gradient">
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
                 <div>
 
-                    <h3>Data Kategori Inspeksi</h3>
+                    <h3>Data Sub Uraian</h3>
 
                     <small>
-                        Kelola kategori inspeksi rumah sakit
+                        Kelola data sub uraian inspeksi rumah sakit
                     </small>
 
                 </div>
 
-                <a href="<?php echo e(route('master-data.kategori.create')); ?>"
+                <a href="<?php echo e(route('master-data.sub-uraian.create')); ?>"
                    class="btn-add d-flex align-items-center gap-2">
 
                     <i data-feather="plus-circle"></i>
 
-                    Tambah Kategori
+                    Tambah Sub Uraian
 
                 </a>
 
@@ -246,7 +241,6 @@
 
         </div>
 
-        <!-- BODY -->
         <div class="p-4">
 
             <?php if(session('success')): ?>
@@ -260,17 +254,15 @@
 
             <?php endif; ?>
 
-            <!-- SEARCH -->
             <div class="mb-4">
 
                 <input type="text"
-                       id="searchKategori"
+                       id="searchInput"
                        class="form-control search-box"
-                       placeholder="Cari kategori...">
+                       placeholder="Cari sub uraian...">
 
             </div>
 
-            <!-- TABLE -->
             <div class="table-responsive">
 
                 <table class="table table-modern">
@@ -281,7 +273,11 @@
 
                             <th width="80">No</th>
 
-                            <th>Nama Kategori</th>
+                            <th>Kategori</th>
+
+                            <th>Uraian</th>
+
+                            <th>Sub Uraian</th>
 
                             <th width="260" class="text-center">
                                 Aksi
@@ -291,7 +287,7 @@
 
                     </thead>
 
-                    <tbody id="kategoriTable">
+                    <tbody id="tableBody">
 
                         <?php $__empty_1 = true; $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
@@ -310,9 +306,23 @@
 
                                 <td>
 
-                                    <div class="kategori-title">
+                                    <?php echo e($item->uraian->kategori->nama_kategori ?? '-'); ?>
 
-                                        <?php echo e($item->nama_kategori); ?>
+
+                                </td>
+
+                                <td>
+
+                                    <?php echo e($item->uraian->nama_uraian ?? '-'); ?>
+
+
+                                </td>
+
+                                <td>
+
+                                    <div class="sub-title">
+
+                                        <?php echo e($item->nama_sub_uraian); ?>
 
 
                                     </div>
@@ -323,7 +333,6 @@
 
                                     <div class="action-group">
 
-                                        <!-- EDIT -->
                                         <button
                                             class="btn-action btn-edit"
                                             data-bs-toggle="modal"
@@ -335,8 +344,7 @@
 
                                         </button>
 
-                                        <!-- DELETE -->
-                                        <form action="<?php echo e(route('master-data.kategori.destroy', $item->id)); ?>"
+                                        <form action="<?php echo e(route('master-data.sub-uraian.destroy', $item->id)); ?>"
                                               method="POST"
                                               onsubmit="return confirm('Yakin ingin menghapus data ini?')">
 
@@ -360,101 +368,17 @@
 
                             </tr>
 
-                            <!-- MODAL EDIT -->
-                            <div class="modal fade"
-                                 id="editModal<?php echo e($item->id); ?>"
-                                 tabindex="-1">
-
-                                <div class="modal-dialog modal-dialog-centered">
-
-                                    <div class="modal-content">
-
-                                        <div class="modal-header">
-
-                                            <h5 class="fw-bold">
-                                                Edit Kategori
-                                            </h5>
-
-                                            <button type="button"
-                                                    class="btn-close"
-                                                    data-bs-dismiss="modal"></button>
-
-                                        </div>
-
-                                        <form action="<?php echo e(route('master-data.kategori.update', $item->id)); ?>"
-                                              method="POST">
-
-                                            <?php echo csrf_field(); ?>
-                                            <?php echo method_field('PUT'); ?>
-
-                                            <div class="modal-body">
-
-                                                <div class="mb-3">
-
-                                                    <label class="form-label fw-semibold">
-                                                        Nama Kategori
-                                                    </label>
-
-                                                    <input type="text"
-                                                           name="nama_kategori"
-                                                           class="form-control"
-                                                           value="<?php echo e($item->nama_kategori); ?>"
-                                                           required>
-
-                                                </div>
-
-                                            </div>
-
-                                            <div class="modal-footer">
-
-                                                <button type="button"
-                                                        class="btn btn-light rounded-3"
-                                                        data-bs-dismiss="modal">
-
-                                                    Batal
-
-                                                </button>
-
-                                                <button type="submit"
-                                                        class="btn-save">
-
-                                                    Update Data
-
-                                                </button>
-
-                                            </div>
-
-                                        </form>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                             <tr>
 
-                                <td colspan="3">
+                                <td colspan="5">
 
-                                    <div class="text-center py-5 empty-state">
+                                    <div class="text-center py-5 text-muted">
 
-                                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486740.png"
-                                             width="120"
-                                             class="mb-3">
-
-                                        <h5 class="fw-bold text-muted">
-
+                                        <h5 class="fw-bold">
                                             Belum Ada Data
-
                                         </h5>
-
-                                        <p class="text-muted mb-0">
-
-                                            Silakan tambah kategori terlebih dahulu
-
-                                        </p>
 
                                     </div>
 
@@ -478,29 +402,40 @@
 
 <script>
 
-    // SEARCH FILTER
-    document.getElementById('searchKategori')
-    .addEventListener('keyup', function(){
+document.addEventListener('DOMContentLoaded', function () {
 
-        let value = this.value.toLowerCase();
+    feather.replace();
 
-        let rows = document.querySelectorAll('#kategoriTable tr');
+    const searchInput = document.getElementById('searchInput');
 
-        rows.forEach(row => {
+    if(searchInput){
 
-            row.style.display =
-                row.innerText.toLowerCase().includes(value)
-                ? ''
-                : 'none';
+        searchInput.addEventListener('keyup', function(){
+
+            const value = this.value.toLowerCase();
+
+            const rows = document.querySelectorAll('#tableBody tr');
+
+            rows.forEach(function(row){
+
+                const text = row.innerText.toLowerCase();
+
+                if(text.includes(value)){
+                    row.style.display = '';
+                }else{
+                    row.style.display = 'none';
+                }
+
+            });
 
         });
 
-    });
+    }
 
-    // FEATHER ICON
-    feather.replace();
+});
 
 </script>
 
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/kategori/index.blade.php ENDPATH**/ ?>
+
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/sub-uraian/index.blade.php ENDPATH**/ ?>

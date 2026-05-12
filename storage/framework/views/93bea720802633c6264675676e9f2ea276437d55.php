@@ -1,99 +1,120 @@
 
 
-<?php $__env->startSection('title', 'Data Ruangan'); ?>
+<?php $__env->startSection('title', 'Data Kategori'); ?>
 
 <?php $__env->startSection('breadcrumb-title'); ?>
-<h3 class="fw-bold">Data Ruangan</h3>
+<h3 class="fw-bold">Data Kategori</h3>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('breadcrumb-items'); ?>
 <li class="breadcrumb-item">Master Data</li>
-<li class="breadcrumb-item active">Ruangan</li>
+<li class="breadcrumb-item active">Kategori</li>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
 
 <style>
 
+    body{
+        background:#f4f7fb;
+    }
+
     .main-card{
         border:none;
-        border-radius:24px;
+        border-radius:28px;
         overflow:hidden;
-        background:#fff;
-        box-shadow:0 10px 30px rgba(0,0,0,0.08);
+        background:#ffffff;
+        box-shadow:0 10px 40px rgba(0,0,0,0.08);
     }
 
     .header-gradient{
         background:linear-gradient(135deg,#4f46e5,#2563eb);
-        padding:30px;
+        padding:32px;
         color:white;
     }
 
     .header-gradient h3{
         font-weight:700;
-        margin-bottom:5px;
+        margin-bottom:6px;
     }
 
-    .btn-modern{
-        border-radius:14px;
-        padding:10px 18px;
+    .header-gradient small{
+        opacity:0.8;
+    }
+
+    .btn-add{
+        background:white;
+        color:#2563eb;
+        border:none;
+        border-radius:16px;
+        padding:12px 22px;
         font-weight:600;
         transition:0.3s;
     }
 
-    .btn-modern:hover{
+    .btn-add:hover{
         transform:translateY(-2px);
+        background:#f8fafc;
     }
 
     .search-box{
         border:none;
-        background:#f1f5f9;
-        border-radius:14px;
-        padding:14px 16px;
+        background:#eef2ff;
+        border-radius:16px;
+        padding:14px 18px;
+        font-size:15px;
     }
 
     .search-box:focus{
-        background:#e2e8f0;
+        background:#e0e7ff;
         box-shadow:none;
     }
 
     .table-modern{
         border-collapse:separate;
-        border-spacing:0 14px;
+        border-spacing:0 16px;
+    }
+
+    .table-modern thead th{
+        border:none;
+        color:#64748b;
+        font-size:14px;
+        font-weight:700;
+        padding:0 18px;
     }
 
     .table-modern tbody tr{
         background:#fff;
-        box-shadow:0 4px 15px rgba(0,0,0,0.05);
-        border-radius:16px;
+        border-radius:18px;
+        box-shadow:0 5px 18px rgba(0,0,0,0.05);
         transition:0.3s;
     }
 
     .table-modern tbody tr:hover{
         transform:translateY(-3px);
-        box-shadow:0 8px 25px rgba(0,0,0,0.08);
+        box-shadow:0 10px 24px rgba(0,0,0,0.08);
     }
 
-    .table-modern td,
-    .table-modern th{
+    .table-modern td{
         border:none !important;
         vertical-align:middle;
-        padding:18px;
+        padding:20px 18px;
     }
 
-    .badge-number{
-        width:36px;
-        height:36px;
-        border-radius:12px;
+    .number-badge{
+        width:40px;
+        height:40px;
+        border-radius:14px;
         background:#eef2ff;
-        color:#4f46e5;
+        color:#4338ca;
         display:flex;
         align-items:center;
         justify-content:center;
         font-weight:700;
     }
 
-    .room-title{
+    .kategori-title{
+        font-size:16px;
         font-weight:700;
         color:#0f172a;
     }
@@ -106,12 +127,12 @@
 
     .btn-action{
         border:none;
-        border-radius:12px;
+        border-radius:14px;
         padding:10px 16px;
+        font-weight:600;
         display:flex;
         align-items:center;
         gap:6px;
-        font-weight:600;
         transition:0.3s;
     }
 
@@ -126,16 +147,30 @@
 
     .btn-delete{
         background:#ef4444;
-        color:#fff;
+        color:white;
     }
 
-    .empty-state img{
-        opacity:0.7;
+    .btn-save{
+        background:#2563eb;
+        color:white;
+        border:none;
+        border-radius:14px;
+        padding:10px 20px;
+        font-weight:600;
     }
 
     .modal-content{
         border:none;
         border-radius:24px;
+    }
+
+    .modal-header{
+        border:none;
+        padding-bottom:0;
+    }
+
+    .modal-footer{
+        border:none;
     }
 
     .form-control{
@@ -148,23 +183,31 @@
         border-color:#4f46e5;
     }
 
+    .empty-state img{
+        opacity:0.7;
+    }
+
     @media(max-width:768px){
 
         .header-gradient{
             padding:22px;
         }
 
-        .btn-modern{
+        .btn-add{
             width:100%;
         }
 
-        .action-group{
-            flex-direction:column;
+        .table-modern td{
+            padding:14px;
         }
 
         .btn-action{
             width:100%;
             justify-content:center;
+        }
+
+        .action-group{
+            flex-direction:column;
         }
 
     }
@@ -182,20 +225,20 @@
 
                 <div>
 
-                    <h3>Data Ruangan</h3>
+                    <h3>Data Kategori Inspeksi</h3>
 
                     <small>
-                        Kelola data ruangan inspeksi rumah sakit
+                        Kelola kategori inspeksi rumah sakit
                     </small>
 
                 </div>
 
-                <a href="<?php echo e(route('master-data.ruangan.create')); ?>"
-                   class="btn btn-light btn-modern">
+                <a href="<?php echo e(route('master-data.kategori.create')); ?>"
+                   class="btn-add d-flex align-items-center gap-2">
 
                     <i data-feather="plus-circle"></i>
 
-                    Tambah Ruangan
+                    Tambah Kategori
 
                 </a>
 
@@ -208,14 +251,10 @@
 
             <?php if(session('success')): ?>
 
-                <div class="alert alert-success border-0 rounded-4 shadow-sm alert-dismissible fade show">
+                <div class="alert alert-success border-0 rounded-4 shadow-sm">
 
                     <?php echo e(session('success')); ?>
 
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="alert"></button>
 
                 </div>
 
@@ -225,28 +264,26 @@
             <div class="mb-4">
 
                 <input type="text"
-                       id="searchRuangan"
+                       id="searchKategori"
                        class="form-control search-box"
-                       placeholder="Cari ruangan atau lokasi...">
+                       placeholder="Cari kategori...">
 
             </div>
 
             <!-- TABLE -->
             <div class="table-responsive">
 
-                <table class="table table-modern align-middle">
+                <table class="table table-modern">
 
-                    <thead class="table-light">
+                    <thead>
 
                         <tr>
 
-                            <th width="70">No</th>
+                            <th width="80">No</th>
 
-                            <th>Nama Ruangan</th>
+                            <th>Nama Kategori</th>
 
-                            <th>Lokasi</th>
-
-                            <th width="240" class="text-center">
+                            <th width="260" class="text-center">
                                 Aksi
                             </th>
 
@@ -254,7 +291,7 @@
 
                     </thead>
 
-                    <tbody id="ruanganTable">
+                    <tbody id="kategoriTable">
 
                         <?php $__empty_1 = true; $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
@@ -262,7 +299,7 @@
 
                                 <td>
 
-                                    <div class="badge-number">
+                                    <div class="number-badge">
 
                                         <?php echo e($loop->iteration); ?>
 
@@ -273,19 +310,12 @@
 
                                 <td>
 
-                                    <div class="room-title">
+                                    <div class="kategori-title">
 
-                                        <?php echo e($item->nama_ruangan); ?>
+                                        <?php echo e($item->nama_kategori); ?>
 
 
                                     </div>
-
-                                </td>
-
-                                <td>
-
-                                    <?php echo e($item->lokasi ?? '-'); ?>
-
 
                                 </td>
 
@@ -306,7 +336,7 @@
                                         </button>
 
                                         <!-- DELETE -->
-                                        <form action="<?php echo e(route('master-data.ruangan.destroy', $item->id)); ?>"
+                                        <form action="<?php echo e(route('master-data.kategori.destroy', $item->id)); ?>"
                                               method="POST"
                                               onsubmit="return confirm('Yakin ingin menghapus data ini?')">
 
@@ -339,10 +369,10 @@
 
                                     <div class="modal-content">
 
-                                        <div class="modal-header border-0">
+                                        <div class="modal-header">
 
                                             <h5 class="fw-bold">
-                                                Edit Ruangan
+                                                Edit Kategori
                                             </h5>
 
                                             <button type="button"
@@ -351,7 +381,7 @@
 
                                         </div>
 
-                                        <form action="<?php echo e(route('master-data.ruangan.update', $item->id)); ?>"
+                                        <form action="<?php echo e(route('master-data.kategori.update', $item->id)); ?>"
                                               method="POST">
 
                                             <?php echo csrf_field(); ?>
@@ -362,33 +392,20 @@
                                                 <div class="mb-3">
 
                                                     <label class="form-label fw-semibold">
-                                                        Nama Ruangan
+                                                        Nama Kategori
                                                     </label>
 
                                                     <input type="text"
-                                                           name="nama_ruangan"
+                                                           name="nama_kategori"
                                                            class="form-control"
-                                                           value="<?php echo e($item->nama_ruangan); ?>"
+                                                           value="<?php echo e($item->nama_kategori); ?>"
                                                            required>
-
-                                                </div>
-
-                                                <div class="mb-3">
-
-                                                    <label class="form-label fw-semibold">
-                                                        Lokasi
-                                                    </label>
-
-                                                    <input type="text"
-                                                           name="lokasi"
-                                                           class="form-control"
-                                                           value="<?php echo e($item->lokasi); ?>">
 
                                                 </div>
 
                                             </div>
 
-                                            <div class="modal-footer border-0">
+                                            <div class="modal-footer">
 
                                                 <button type="button"
                                                         class="btn btn-light rounded-3"
@@ -399,7 +416,7 @@
                                                 </button>
 
                                                 <button type="submit"
-                                                        class="btn btn-primary rounded-3">
+                                                        class="btn-save">
 
                                                     Update Data
 
@@ -419,19 +436,24 @@
 
                             <tr>
 
-                                <td colspan="4">
+                                <td colspan="3">
 
-                                    <div class="text-center py-5 text-muted empty-state">
+                                    <div class="text-center py-5 empty-state">
 
-                                        <i data-feather="inbox"
-                                           style="width:50px;height:50px;"></i>
+                                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486740.png"
+                                             width="120"
+                                             class="mb-3">
 
-                                        <h5 class="mt-3 fw-bold">
-                                            Belum Ada Data Ruangan
+                                        <h5 class="fw-bold text-muted">
+
+                                            Belum Ada Data
+
                                         </h5>
 
-                                        <p class="mb-0">
-                                            Silakan tambahkan ruangan terlebih dahulu
+                                        <p class="text-muted mb-0">
+
+                                            Silakan tambah kategori terlebih dahulu
+
                                         </p>
 
                                     </div>
@@ -456,15 +478,13 @@
 
 <script>
 
-    feather.replace();
-
     // SEARCH FILTER
-    document.getElementById('searchRuangan')
+    document.getElementById('searchKategori')
     .addEventListener('keyup', function(){
 
         let value = this.value.toLowerCase();
 
-        let rows = document.querySelectorAll('#ruanganTable tr');
+        let rows = document.querySelectorAll('#kategoriTable tr');
 
         rows.forEach(row => {
 
@@ -477,7 +497,10 @@
 
     });
 
+    // FEATHER ICON
+    feather.replace();
+
 </script>
 
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/ruangan/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/kategori/index.blade.php ENDPATH**/ ?>

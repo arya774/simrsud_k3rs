@@ -16,4 +16,4 @@
     feather.replace()
     AOS.init();
 </script>
-<?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/layouts/dashboard/script.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/layouts/dashboard/script.blade.php ENDPATH**/ ?>

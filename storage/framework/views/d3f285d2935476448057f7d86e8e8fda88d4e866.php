@@ -17,4 +17,4 @@
     <?php echo $__env->make('layouts.authentication.script', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
   </body>
 </html>
-<?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/layouts/authentication/master.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/layouts/authentication/master.blade.php ENDPATH**/ ?>
