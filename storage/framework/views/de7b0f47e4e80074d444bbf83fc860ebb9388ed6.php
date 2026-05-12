@@ -1,16 +1,16 @@
-@extends('layouts.dashboard.master')
 
-@section('title', 'Hasil Inspeksi')
 
-@section('breadcrumb-title')
+<?php $__env->startSection('title', 'Hasil Inspeksi'); ?>
+
+<?php $__env->startSection('breadcrumb-title'); ?>
 
 <h3>
     Hasil Inspeksi
 </h3>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('breadcrumb-items')
+<?php $__env->startSection('breadcrumb-items'); ?>
 
 <li class="breadcrumb-item">
     Inspeksi
@@ -20,9 +20,9 @@
     Hasil Inspeksi
 </li>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <style>
 
@@ -221,7 +221,8 @@
 
                 <div class="info-value">
 
-                    {{ \Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y') }}
+                    <?php echo e(\Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y')); ?>
+
 
                 </div>
 
@@ -239,7 +240,8 @@
 
                 <div class="info-value">
 
-                    {{ $inspeksi->ruangan->nama_ruangan ?? '-' }}
+                    <?php echo e($inspeksi->ruangan->nama_ruangan ?? '-'); ?>
+
 
                 </div>
 
@@ -257,7 +259,8 @@
 
                 <div class="info-value">
 
-                    {{ $inspeksi->nama_petugas_k3rs ?? '-' }}
+                    <?php echo e($inspeksi->nama_petugas_k3rs ?? '-'); ?>
+
 
                 </div>
 
@@ -271,7 +274,7 @@
 
                 <div class="score-value">
 
-                    {{ $inspeksi->hasil }}%
+                    <?php echo e($inspeksi->hasil); ?>%
 
                 </div>
 
@@ -283,9 +286,10 @@
 
                 <div class="mt-3">
 
-                    <span class="status-badge status-{{ $inspeksi->badge }}">
+                    <span class="status-badge status-<?php echo e($inspeksi->badge); ?>">
 
-                        {{ $inspeksi->status }}
+                        <?php echo e($inspeksi->status); ?>
+
 
                     </span>
 
@@ -339,37 +343,40 @@
 
                     <tbody>
 
-                        @foreach($subUraian as $item)
+                        <?php $__currentLoopData = $subUraian; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                             <tr>
 
                                 <td>
 
-                                    {{ $loop->iteration }}
+                                    <?php echo e($loop->iteration); ?>
+
 
                                 </td>
 
                                 <td>
 
-                                    {{ $item->uraian->nama_uraian ?? '-' }}
+                                    <?php echo e($item->uraian->nama_uraian ?? '-'); ?>
+
 
                                 </td>
 
                                 <td>
 
-                                    {{ $item->nama_sub_uraian }}
+                                    <?php echo e($item->nama_sub_uraian); ?>
+
 
                                 </td>
 
                                 <td>
 
-                                    @php
+                                    <?php
 
                                         $value = $jawaban[$item->id] ?? '-';
 
-                                    @endphp
+                                    ?>
 
-                                    @if($value == 'Baik')
+                                    <?php if($value == 'Baik'): ?>
 
                                         <span class="badge-baik">
 
@@ -377,7 +384,7 @@
 
                                         </span>
 
-                                    @elseif($value == 'Tidak Baik')
+                                    <?php elseif($value == 'Tidak Baik'): ?>
 
                                         <span class="badge-tidak">
 
@@ -385,17 +392,17 @@
 
                                         </span>
 
-                                    @else
+                                    <?php else: ?>
 
                                         -
 
-                                    @endif
+                                    <?php endif; ?>
 
                                 </td>
 
                             </tr>
 
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                     </tbody>
 
@@ -421,7 +428,8 @@
 
             <div style="line-height:1.8; color:#475569;">
 
-                {{ $inspeksi->keterangan ?? 'Tidak ada catatan inspeksi.' }}
+                <?php echo e($inspeksi->keterangan ?? 'Tidak ada catatan inspeksi.'); ?>
+
 
             </div>
 
@@ -447,22 +455,23 @@
 
                 <div class="fw-bold mb-3">
 
-                    {{ $inspeksi->nama_petugas_k3rs ?? '-' }}
+                    <?php echo e($inspeksi->nama_petugas_k3rs ?? '-'); ?>
+
 
                 </div>
 
-                @if($inspeksi->ttd_k3rs)
+                <?php if($inspeksi->ttd_k3rs): ?>
 
-                    <img src="{{ $inspeksi->ttd_k3rs }}"
+                    <img src="<?php echo e($inspeksi->ttd_k3rs); ?>"
                          alt="TTD K3RS">
 
-                @else
+                <?php else: ?>
 
                     <div class="text-muted">
                         Tidak ada tanda tangan
                     </div>
 
-                @endif
+                <?php endif; ?>
 
             </div>
 
@@ -482,22 +491,23 @@
 
                 <div class="fw-bold mb-3">
 
-                    {{ $inspeksi->nama_petugas_ruangan ?? '-' }}
+                    <?php echo e($inspeksi->nama_petugas_ruangan ?? '-'); ?>
+
 
                 </div>
 
-                @if($inspeksi->ttd_ruangan)
+                <?php if($inspeksi->ttd_ruangan): ?>
 
-                    <img src="{{ $inspeksi->ttd_ruangan }}"
+                    <img src="<?php echo e($inspeksi->ttd_ruangan); ?>"
                          alt="TTD Ruangan">
 
-                @else
+                <?php else: ?>
 
                     <div class="text-muted">
                         Tidak ada tanda tangan
                     </div>
 
-                @endif
+                <?php endif; ?>
 
             </div>
 
@@ -507,4 +517,5 @@
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/inspeksi/hasil.blade.php ENDPATH**/ ?>

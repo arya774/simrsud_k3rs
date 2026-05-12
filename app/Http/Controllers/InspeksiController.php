@@ -19,14 +19,44 @@ class InspeksiController extends Controller
     */
     public function index()
     {
+        $inspeksis = Inspeksi::with([
+            'ruangan',
+            'kategori'
+        ])
+        ->latest()
+        ->get();
+
         return view('inspeksi.index', [
-            'kategori' => Kategori::orderBy('id')->get(),
-            'uraian' => Uraian::orderBy('id')->get(),
-            'subUraian' => SubUraian::with('uraian')->orderBy('id')->get(),
-            'ruangan' => Ruangan::orderBy('nama_ruangan')->get(),
+            'kategori'   => Kategori::orderBy('id')->get(),
+            'uraian'     => Uraian::orderBy('id')->get(),
+            'subUraian'  => SubUraian::with('uraian')->orderBy('id')->get(),
+            'ruangan'    => Ruangan::orderBy('nama_ruangan')->get(),
+            'inspeksis'  => $inspeksis,
         ]);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RIWAYAT INSPEKSI
+    |--------------------------------------------------------------------------
+    */
+    public function riwayat()
+    {
+        $inspeksis = Inspeksi::with([
+            'ruangan',
+            'kategori'
+        ])
+        ->latest()
+        ->get();
+
+        return view('inspeksi.riwayat', compact('inspeksis'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE
+    |--------------------------------------------------------------------------
+    */
     public function create()
     {
         return $this->index();
@@ -34,77 +64,89 @@ class InspeksiController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE (FIX TOTAL AMAN + REDIRECT STABIL)
+    | STORE
     |--------------------------------------------------------------------------
     */
     public function store(Request $request)
     {
         $request->validate([
-            'tanggal' => 'required|date',
-            'ruangan_id' => 'required',
-            'keterangan' => 'nullable',
-            'nama_petugas_k3rs' => 'nullable|string|max:255',
-            'nama_petugas_ruangan' => 'nullable|string|max:255',
-            'ttd_k3rs' => 'nullable',
-            'ttd_ruangan' => 'nullable',
-            'jawaban' => 'nullable|array',
+            'tanggal'               => 'required|date',
+            'ruangan_id'            => 'required|exists:ruangans,id',
+            'kategori_id'           => 'required|exists:kategoris,id',
+            'jawaban'               => 'required|array',
+            'nama_petugas_k3rs'     => 'nullable|string|max:255',
+            'nama_petugas_ruangan'  => 'nullable|string|max:255',
+            'keterangan'            => 'nullable|string',
         ]);
+
+        DB::beginTransaction();
 
         try {
 
-            DB::beginTransaction();
+            $jawaban = $request->jawaban ?? [];
 
-            $inspeksi = new Inspeksi();
-            $inspeksi->tanggal = $request->tanggal;
-            $inspeksi->ruangan_id = $request->ruangan_id;
-            $inspeksi->keterangan = $request->keterangan;
-            $inspeksi->nama_petugas_k3rs = $request->nama_petugas_k3rs;
-            $inspeksi->nama_petugas_ruangan = $request->nama_petugas_ruangan;
-            $inspeksi->ttd_k3rs = $request->ttd_k3rs;
-            $inspeksi->ttd_ruangan = $request->ttd_ruangan;
+            $totalChecklist = count($jawaban);
 
-            // FIX: selalu array aman
-            $inspeksi->jawaban = json_encode($request->jawaban ?? [], JSON_UNESCAPED_UNICODE);
+            $jumlahBaik = collect($jawaban)
+                ->filter(function ($value) {
+                    return $value === 'Baik';
+                })
+                ->count();
 
-            $inspeksi->save();
+            $hasil = $totalChecklist > 0
+                ? round(($jumlahBaik / $totalChecklist) * 100)
+                : 0;
+
+            $inspeksi = Inspeksi::create([
+                'tanggal'               => $request->tanggal,
+                'ruangan_id'            => $request->ruangan_id,
+                'kategori_id'           => $request->kategori_id,
+                'keterangan'            => $request->keterangan,
+                'nama_petugas_k3rs'     => $request->nama_petugas_k3rs,
+                'nama_petugas_ruangan'  => $request->nama_petugas_ruangan,
+                'ttd_k3rs'              => $request->ttd_k3rs,
+                'ttd_ruangan'           => $request->ttd_ruangan,
+                'jawaban'               => $jawaban,
+                'hasil'                 => $hasil,
+            ]);
 
             DB::commit();
 
-            /*
-            | FIX PENTING:
-            | pakai ID saja (lebih aman dari binding error)
-            */
-            return redirect('/inspeksi/' . $inspeksi->id . '/hasil');
+            return redirect()
+                ->route('inspeksi.riwayat')
+                ->with('success', 'Inspeksi berhasil disimpan');
 
         } catch (\Throwable $e) {
 
             DB::rollBack();
 
-            return back()->with('error', 'Error: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | HASIL INSPEKSI (ANTI BLANK + ANTI ERROR)
+    | DETAIL HASIL
     |--------------------------------------------------------------------------
     */
     public function show($id)
     {
-        $inspeksi = Inspeksi::with('ruangan')->find($id);
-
-        if (!$inspeksi) {
-            abort(404, 'Data inspeksi tidak ditemukan');
-        }
-
-        $jawaban = json_decode($inspeksi->jawaban, true) ?? [];
-
-        $subUraian = SubUraian::with('uraian')->get();
+        $inspeksi = Inspeksi::with([
+            'ruangan',
+            'kategori'
+        ])->findOrFail($id);
 
         return view('inspeksi.hasil', [
             'inspeksi' => $inspeksi,
-            'jawaban' => $jawaban,
-            'subUraian' => $subUraian,
+
+            'jawaban' => is_array($inspeksi->jawaban)
+                ? $inspeksi->jawaban
+                : json_decode($inspeksi->jawaban, true),
+
+            'subUraian' => SubUraian::with('uraian')->get(),
         ]);
     }
 
@@ -113,41 +155,64 @@ class InspeksiController extends Controller
     | EDIT
     |--------------------------------------------------------------------------
     */
-    public function edit(Inspeksi $inspeksi)
+    public function edit($id)
     {
+        $inspeksi = Inspeksi::findOrFail($id);
+
         return view('inspeksi.edit', [
-            'inspeksi' => $inspeksi,
-            'kategori' => Kategori::all(),
-            'uraian' => Uraian::all(),
-            'subUraian' => SubUraian::all(),
-            'ruangan' => Ruangan::all(),
+            'inspeksi'   => $inspeksi,
+            'kategori'   => Kategori::all(),
+            'uraian'     => Uraian::all(),
+            'subUraian'  => SubUraian::with('uraian')->get(),
+            'ruangan'    => Ruangan::all(),
         ]);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | UPDATE (FIX REDIRECT + SAFE JSON)
+    | UPDATE
     |--------------------------------------------------------------------------
     */
-    public function update(Request $request, Inspeksi $inspeksi)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'tanggal' => 'required|date',
-            'ruangan_id' => 'required',
+            'tanggal'     => 'required|date',
+            'ruangan_id'  => 'required|exists:ruangans,id',
+            'kategori_id' => 'required|exists:kategoris,id',
         ]);
+
+        $inspeksi = Inspeksi::findOrFail($id);
+
+        $jawaban = $request->jawaban ?? [];
+
+        $totalChecklist = count($jawaban);
+
+        $jumlahBaik = collect($jawaban)
+            ->filter(function ($value) {
+                return $value === 'Baik';
+            })
+            ->count();
+
+        $hasil = $totalChecklist > 0
+            ? round(($jumlahBaik / $totalChecklist) * 100)
+            : 0;
 
         $inspeksi->update([
-            'tanggal' => $request->tanggal,
-            'ruangan_id' => $request->ruangan_id,
-            'keterangan' => $request->keterangan,
-            'nama_petugas_k3rs' => $request->nama_petugas_k3rs,
-            'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
-            'ttd_k3rs' => $request->ttd_k3rs,
-            'ttd_ruangan' => $request->ttd_ruangan,
-            'jawaban' => json_encode($request->jawaban ?? [], JSON_UNESCAPED_UNICODE),
+            'tanggal'               => $request->tanggal,
+            'ruangan_id'            => $request->ruangan_id,
+            'kategori_id'           => $request->kategori_id,
+            'keterangan'            => $request->keterangan,
+            'nama_petugas_k3rs'     => $request->nama_petugas_k3rs,
+            'nama_petugas_ruangan'  => $request->nama_petugas_ruangan,
+            'ttd_k3rs'              => $request->ttd_k3rs,
+            'ttd_ruangan'           => $request->ttd_ruangan,
+            'jawaban'               => $jawaban,
+            'hasil'                 => $hasil,
         ]);
 
-        return redirect()->route('inspeksi.hasil', ['inspeksi' => $inspeksi->id]);
+        return redirect()
+            ->route('inspeksi.riwayat')
+            ->with('success', 'Data inspeksi berhasil diperbarui');
     }
 
     /*
@@ -155,11 +220,14 @@ class InspeksiController extends Controller
     | DELETE
     |--------------------------------------------------------------------------
     */
-    public function destroy(Inspeksi $inspeksi)
+    public function destroy($id)
     {
+        $inspeksi = Inspeksi::findOrFail($id);
+
         $inspeksi->delete();
 
-        return redirect()->route('inspeksi.index')
+        return redirect()
+            ->route('inspeksi.riwayat')
             ->with('success', 'Data inspeksi berhasil dihapus');
     }
 }

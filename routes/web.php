@@ -11,7 +11,6 @@ use App\Http\Controllers\SubUraianController;
 use App\Http\Controllers\RuanganController;
 
 use App\Http\Controllers\InspeksiController;
-use App\Http\Controllers\RiwayatInspeksiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +25,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->name('login.store');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -67,14 +67,12 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | INSPEKSI MODULE (FIXED TOTAL FLOW)
+    | INSPEKSI
     |--------------------------------------------------------------------------
     */
     Route::prefix('inspeksi')->name('inspeksi.')->group(function () {
 
-        /*
-        | FORM INSPEKSI
-        */
+        // FORM
         Route::get('/', [InspeksiController::class, 'index'])
             ->name('index');
 
@@ -84,33 +82,25 @@ Route::middleware('auth')->group(function () {
         Route::post('/store', [InspeksiController::class, 'store'])
             ->name('store');
 
+        // RIWAYAT (FIX)
+        Route::get('/riwayat', [InspeksiController::class, 'riwayat'])
+            ->name('riwayat');
+
+        // HASIL
         Route::get('/{inspeksi}/hasil', [InspeksiController::class, 'show'])
             ->name('hasil');
 
-        /*
-        | EDIT
-        */
+        // EDIT
         Route::get('/{inspeksi}/edit', [InspeksiController::class, 'edit'])
             ->name('edit');
 
-        /*
-        | UPDATE
-        */
+        // UPDATE
         Route::put('/{inspeksi}', [InspeksiController::class, 'update'])
             ->name('update');
 
-        /*
-        | DELETE
-        */
+        // DELETE
         Route::delete('/{inspeksi}', [InspeksiController::class, 'destroy'])
             ->name('destroy');
-
-        /*
-        | RIWAYAT
-        */
-        Route::get('/riwayat', [RiwayatInspeksiController::class, 'index'])
-            ->name('riwayat');
-
     });
 
     /*
@@ -120,8 +110,8 @@ Route::middleware('auth')->group(function () {
     */
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
-
 });
+
 
 /*
 |--------------------------------------------------------------------------

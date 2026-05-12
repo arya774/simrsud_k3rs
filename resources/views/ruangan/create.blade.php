@@ -58,17 +58,6 @@
         right:-70px;
     }
 
-    .ruangan-header::after{
-        content:'';
-        position:absolute;
-        width:140px;
-        height:140px;
-        border-radius:50%;
-        background:rgba(255,255,255,0.05);
-        bottom:-60px;
-        left:-40px;
-    }
-
     .ruangan-title{
         position:relative;
         z-index:2;
@@ -86,8 +75,6 @@
     }
 
     .btn-kembali{
-        position:relative;
-        z-index:2;
         background:#fff;
         color:#2563eb;
         border:none;
@@ -99,8 +86,8 @@
 
     .btn-kembali:hover{
         background:#f8fafc;
-        transform:translateY(-2px);
         color:#1d4ed8;
+        transform:translateY(-2px);
     }
 
     .ruangan-body{
@@ -119,22 +106,11 @@
         border:1px solid #dbe2ea;
         padding:0 18px;
         font-size:15px;
-        transition:.3s;
     }
 
     .form-control:focus{
         border-color:#6366f1;
         box-shadow:0 0 0 5px rgba(99,102,241,0.12);
-    }
-
-    .form-control.is-invalid{
-        border-color:#dc3545;
-    }
-
-    .invalid-feedback{
-        display:block;
-        margin-top:8px;
-        font-size:13px;
     }
 
     .btn-simpan{
@@ -144,12 +120,6 @@
         padding:0 32px;
         font-weight:700;
         background:linear-gradient(135deg,#2563eb,#7c3aed);
-        transition:.3s;
-    }
-
-    .btn-simpan:hover{
-        transform:translateY(-2px);
-        box-shadow:0 12px 25px rgba(37,99,235,0.25);
     }
 
     .btn-batal{
@@ -160,34 +130,11 @@
         border:1px solid #dbe2ea;
         background:#fff;
         color:#475569;
-        transition:.3s;
-    }
-
-    .btn-batal:hover{
-        background:#f8fafc;
     }
 
     .alert{
         border:none;
         border-radius:18px;
-    }
-
-    @media(max-width:768px){
-
-        .ruangan-header{
-            padding:28px;
-        }
-
-        .ruangan-body{
-            padding:28px;
-        }
-
-        .btn-kembali,
-        .btn-simpan,
-        .btn-batal{
-            width:100%;
-        }
-
     }
 
 </style>
@@ -201,7 +148,6 @@
             <div class="card ruangan-card">
 
                 {{-- HEADER --}}
-
                 <div class="ruangan-header">
 
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -209,15 +155,11 @@
                         <div class="ruangan-title">
 
                             <h3>
-
                                 Tambah Ruangan
-
                             </h3>
 
                             <p>
-
                                 Tambahkan data ruangan inspeksi rumah sakit
-
                             </p>
 
                         </div>
@@ -225,9 +167,7 @@
                         <a href="{{ route('master-data.ruangan.index') }}"
                            class="btn btn-kembali">
 
-                            <i data-feather="arrow-left"></i>
-
-                            Kembali
+                            ← Kembali
 
                         </a>
 
@@ -236,20 +176,18 @@
                 </div>
 
                 {{-- BODY --}}
-
                 <div class="ruangan-body">
 
+                    {{-- ERROR --}}
                     @if ($errors->any())
 
-                        <div class="alert alert-danger shadow-sm">
+                        <div class="alert alert-danger mb-4">
 
-                            <div class="fw-bold mb-2">
+                            <strong>
+                                Terjadi Error:
+                            </strong>
 
-                                Terjadi kesalahan:
-
-                            </div>
-
-                            <ul class="mb-0 ps-3">
+                            <ul class="mb-0 mt-2">
 
                                 @foreach ($errors->all() as $error)
 
@@ -263,73 +201,60 @@
 
                     @endif
 
-                    {{-- FORM --}}
+                    {{-- SUCCESS --}}
+                    @if(session('success'))
 
+                        <div class="alert alert-success mb-4">
+
+                            {{ session('success') }}
+
+                        </div>
+
+                    @endif
+
+                    {{-- FORM --}}
                     <form action="{{ route('master-data.ruangan.store') }}"
                           method="POST">
 
                         @csrf
 
                         {{-- NAMA RUANGAN --}}
-
                         <div class="mb-4">
 
                             <label class="form-label">
-
                                 Nama Ruangan
-
                             </label>
 
                             <input type="text"
                                    name="nama_ruangan"
-                                   class="form-control @error('nama_ruangan') is-invalid @enderror"
+                                   class="form-control"
                                    placeholder="Contoh : Ruang Tulip"
-                                   value="{{ old('nama_ruangan') }}">
-
-                            @error('nama_ruangan')
-
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-
-                            @enderror
+                                   value="{{ old('nama_ruangan') }}"
+                                   required>
 
                         </div>
 
                         {{-- LOKASI --}}
-
                         <div class="mb-4">
 
                             <label class="form-label">
-
                                 Lokasi Ruangan
-
                             </label>
 
                             <input type="text"
                                    name="lokasi"
-                                   class="form-control @error('lokasi') is-invalid @enderror"
+                                   class="form-control"
                                    placeholder="Contoh : Lantai 2 Gedung A"
-                                   value="{{ old('lokasi') }}">
-
-                            @error('lokasi')
-
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-
-                            @enderror
+                                   value="{{ old('lokasi') }}"
+                                   required>
 
                         </div>
 
                         {{-- BUTTON --}}
-
                         <div class="d-flex flex-wrap gap-3">
 
                             <button type="submit"
                                     class="btn btn-primary btn-simpan">
-
-                                <i data-feather="save"></i>
 
                                 Simpan Data
 

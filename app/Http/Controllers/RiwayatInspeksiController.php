@@ -6,10 +6,19 @@ use App\Models\Inspeksi;
 
 class RiwayatInspeksiController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | RIWAYAT INSPEKSI
+    |--------------------------------------------------------------------------
+    */
     public function index()
     {
-        $inspeksi = Inspeksi::latest()->get();
+        $riwayat = Inspeksi::with('ruangan')
+            ->latest()
+            ->get();
 
-        return view('inspeksi.riwayat', compact('inspeksi'));
+        return view('inspeksi.riwayat', [
+            'riwayat' => $riwayat
+        ]);
     }
 }

@@ -10,12 +10,6 @@ use App\Models\SubUraian;
 
 class DashboardController extends Controller
 {
-    /**
-     * --------------------------------------------------------------------------
-     * DASHBOARD
-     * --------------------------------------------------------------------------
-     */
-
     public function index()
     {
         /*
@@ -23,13 +17,9 @@ class DashboardController extends Controller
         | TOTAL DATA CARD
         |--------------------------------------------------------------------------
         */
-
         $totalInspeksi = Inspeksi::count();
-
         $totalRuangan = Ruangan::count();
-
         $totalKategori = Kategori::count();
-
         $totalSubUraian = SubUraian::count();
 
         /*
@@ -37,7 +27,6 @@ class DashboardController extends Controller
         | DATA INSPEKSI TERBARU
         |--------------------------------------------------------------------------
         */
-
         $inspeksi = Inspeksi::with('ruangan')
             ->latest()
             ->paginate(10);
@@ -47,27 +36,22 @@ class DashboardController extends Controller
         | GRAFIK STATUS JAWABAN
         |--------------------------------------------------------------------------
         */
-
         $totalBaik = 0;
-
         $totalTidakBaik = 0;
 
         foreach ($inspeksi as $item) {
 
-            $jawaban = json_decode($item->jawaban, true);
+            // ❗ SUDAH ARRAY (karena cast di model)
+            $jawaban = $item->jawaban ?? [];
 
-            if ($jawaban) {
+            if (is_array($jawaban)) {
 
                 foreach ($jawaban as $value) {
 
-                    if ($value == 'Baik') {
-
+                    if ($value === 'Baik') {
                         $totalBaik++;
-
                     } else {
-
                         $totalTidakBaik++;
-
                     }
                 }
             }
@@ -78,19 +62,14 @@ class DashboardController extends Controller
         | RETURN VIEW
         |--------------------------------------------------------------------------
         */
-
         return view('dashboard', compact(
-
             'totalInspeksi',
             'totalRuangan',
             'totalKategori',
             'totalSubUraian',
-
             'totalBaik',
             'totalTidakBaik',
-
             'inspeksi'
-
         ));
     }
 }
