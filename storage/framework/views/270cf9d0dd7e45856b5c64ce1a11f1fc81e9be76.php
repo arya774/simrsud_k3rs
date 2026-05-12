@@ -11,19 +11,19 @@
           content="width=device-width, initial-scale=1.0">
 
     <meta name="csrf-token"
-          content="{{ csrf_token() }}">
+          content="<?php echo e(csrf_token()); ?>">
 
     <link rel="icon"
-          href="{{ asset('assets/images/logo/logo-rsud.png') }}"
+          href="<?php echo e(asset('assets/images/logo/logo-rsud.png')); ?>"
           type="image/x-icon">
 
     <link rel="shortcut icon"
-          href="{{ asset('assets/images/logo/logo-rsud.png') }}"
+          href="<?php echo e(asset('assets/images/logo/logo-rsud.png')); ?>"
           type="image/x-icon">
 
     <title>
 
-        @yield('title')
+        <?php echo $__env->yieldContent('title'); ?>
 
     </title>
 
@@ -102,11 +102,11 @@
 
     </style>
 
-    @stack('before-style')
+    <?php echo $__env->yieldPushContent('before-style'); ?>
 
-    @include('layouts.dashboard.css')
+    <?php echo $__env->make('layouts.dashboard.css', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
-    @stack('after-style')
+    <?php echo $__env->yieldPushContent('after-style'); ?>
 
 </head>
 
@@ -164,7 +164,7 @@
 
         <!-- HEADER -->
 
-        @include('layouts.dashboard.header')
+        <?php echo $__env->make('layouts.dashboard.header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
         <!-- BODY WRAPPER -->
 
@@ -172,7 +172,7 @@
 
             <!-- SIDEBAR -->
 
-            @include('layouts.dashboard.sidebar')
+            <?php echo $__env->make('layouts.dashboard.sidebar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
             <!-- PAGE BODY -->
 
@@ -188,7 +188,7 @@
 
                             <div class="col-6">
 
-                                @yield('breadcrumb-title')
+                                <?php echo $__env->yieldContent('breadcrumb-title'); ?>
 
                             </div>
 
@@ -198,7 +198,7 @@
 
                                     <li class="breadcrumb-item">
 
-                                        <a href="{{ route('dashboard') }}">
+                                        <a href="<?php echo e(route('dashboard')); ?>">
 
                                             <i data-feather="home"></i>
 
@@ -206,7 +206,7 @@
 
                                     </li>
 
-                                    @yield('breadcrumb-items')
+                                    <?php echo $__env->yieldContent('breadcrumb-items'); ?>
 
                                 </ol>
 
@@ -220,13 +220,13 @@
 
                 <!-- CONTENT -->
 
-                @yield('content')
+                <?php echo $__env->yieldContent('content'); ?>
 
             </div>
 
             <!-- FOOTER -->
 
-            @include('layouts.dashboard.footer')
+            <?php echo $__env->make('layouts.dashboard.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
         </div>
 
@@ -234,15 +234,15 @@
 
     <!-- SCRIPT -->
 
-    @stack('before-script')
+    <?php echo $__env->yieldPushContent('before-script'); ?>
 
-    @include('layouts.dashboard.script')
+    <?php echo $__env->make('layouts.dashboard.script', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <!-- IMPORTANT -->
 
-    @yield('script')
+    <?php echo $__env->yieldContent('script'); ?>
 
-    @stack('after-script')
+    <?php echo $__env->yieldPushContent('after-script'); ?>
 
     <!-- FEATHER ICON -->
 
@@ -258,4 +258,4 @@
 
 </body>
 
-</html>
+</html><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/layouts/dashboard/master.blade.php ENDPATH**/ ?>

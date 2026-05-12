@@ -4,7 +4,7 @@
         <!-- LOGO -->
         <div class="logo-wrapper">
 
-            <a href="{{ route('dashboard') }}">
+            <a href="<?php echo e(route('dashboard')); ?>">
 
                 <img class="img-fluid for-light w-75"
                      src="https://via.placeholder.com/305x60.png?text=Logo+RSUD+Kota+Bogor"
@@ -28,7 +28,7 @@
         <!-- LOGO ICON -->
         <div class="logo-icon-wrapper">
 
-            <a href="{{ route('dashboard') }}">
+            <a href="<?php echo e(route('dashboard')); ?>">
 
                 <img class="img-fluid"
                      src="https://via.placeholder.com/33x33.png?text=RS"
@@ -74,8 +74,8 @@
                     <li class="sidebar-list">
 
                         <a class="sidebar-link sidebar-title link-nav 
-                           {{ request()->routeIs('dashboard') ? 'active' : '' }}"
-                           href="{{ route('dashboard') }}">
+                           <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>"
+                           href="<?php echo e(route('dashboard')); ?>">
 
                             <i data-feather="home"></i>
 
@@ -100,8 +100,8 @@
                     <li class="sidebar-list">
 
                         <a class="sidebar-link sidebar-title link-nav 
-                           {{ request()->routeIs('master-data.kategori.*') ? 'active' : '' }}"
-                           href="{{ route('master-data.kategori.index') }}">
+                           <?php echo e(request()->routeIs('master-data.kategori.*') ? 'active' : ''); ?>"
+                           href="<?php echo e(route('master-data.kategori.index')); ?>">
 
                             <i data-feather="layers"></i>
 
@@ -115,8 +115,8 @@
                     <li class="sidebar-list">
 
                         <a class="sidebar-link sidebar-title link-nav 
-                           {{ request()->routeIs('master-data.uraian.*') ? 'active' : '' }}"
-                           href="{{ route('master-data.uraian.index') }}">
+                           <?php echo e(request()->routeIs('master-data.uraian.*') ? 'active' : ''); ?>"
+                           href="<?php echo e(route('master-data.uraian.index')); ?>">
 
                             <i data-feather="file-text"></i>
 
@@ -130,8 +130,8 @@
                     <li class="sidebar-list">
 
                         <a class="sidebar-link sidebar-title link-nav 
-                           {{ request()->routeIs('master-data.sub-uraian.*') ? 'active' : '' }}"
-                           href="{{ route('master-data.sub-uraian.index') }}">
+                           <?php echo e(request()->routeIs('master-data.sub-uraian.*') ? 'active' : ''); ?>"
+                           href="<?php echo e(route('master-data.sub-uraian.index')); ?>">
 
                             <i data-feather="list"></i>
 
@@ -145,8 +145,8 @@
                     <li class="sidebar-list">
 
                         <a class="sidebar-link sidebar-title link-nav 
-                           {{ request()->routeIs('master-data.ruangan.*') ? 'active' : '' }}"
-                           href="{{ route('master-data.ruangan.index') }}">
+                           <?php echo e(request()->routeIs('master-data.ruangan.*') ? 'active' : ''); ?>"
+                           href="<?php echo e(route('master-data.ruangan.index')); ?>">
 
                             <i data-feather="map-pin"></i>
 
@@ -171,8 +171,8 @@
                     <li class="sidebar-list">
 
                         <a class="sidebar-link sidebar-title link-nav 
-                           {{ request()->routeIs('inspeksi.index') ? 'active' : '' }}"
-                           href="{{ route('inspeksi.index') }}">
+                           <?php echo e(request()->routeIs('inspeksi.index') ? 'active' : ''); ?>"
+                           href="<?php echo e(route('inspeksi.index')); ?>">
 
                             <i data-feather="check-square"></i>
 
@@ -186,8 +186,8 @@
                     <li class="sidebar-list">
 
                         <a class="sidebar-link sidebar-title link-nav 
-                           {{ request()->routeIs('inspeksi.riwayat') ? 'active' : '' }}"
-                           href="{{ route('inspeksi.riwayat') }}">
+                           <?php echo e(request()->routeIs('inspeksi.riwayat') ? 'active' : ''); ?>"
+                           href="<?php echo e(route('inspeksi.riwayat')); ?>">
 
                             <i data-feather="clipboard"></i>
 
@@ -233,9 +233,9 @@
                     <li class="sidebar-list">
 
                         <form method="POST"
-                              action="{{ route('logout') }}">
+                              action="<?php echo e(route('logout')); ?>">
 
-                            @csrf
+                            <?php echo csrf_field(); ?>
 
                             <button type="submit"
                                     class="sidebar-link sidebar-title link-nav border-0 bg-transparent w-100 text-start">
@@ -261,4 +261,4 @@
         </nav>
 
     </div>
-</div>
+</div><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/layouts/dashboard/sidebar.blade.php ENDPATH**/ ?>

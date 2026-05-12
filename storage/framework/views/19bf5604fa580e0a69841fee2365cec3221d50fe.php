@@ -1,12 +1,12 @@
-@extends('layouts.dashboard.master')
 
-@section('title', 'Dashboard')
 
-@section('breadcrumb-title')
+<?php $__env->startSection('title', 'Dashboard'); ?>
+
+<?php $__env->startSection('breadcrumb-title'); ?>
 <h3>Dashboard</h3>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="container-fluid">
 
@@ -24,7 +24,8 @@
                         <div>
                             <span>Kategori</span>
                             <h3 class="mb-0">
-                                {{ $totalKategori ?? 0 }}
+                                <?php echo e($totalKategori ?? 0); ?>
+
                             </h3>
                         </div>
 
@@ -52,7 +53,8 @@
                         <div>
                             <span>Sub Uraian</span>
                             <h3 class="mb-0">
-                                {{ $totalSubUraian ?? 0 }}
+                                <?php echo e($totalSubUraian ?? 0); ?>
+
                             </h3>
                         </div>
 
@@ -80,7 +82,8 @@
                         <div>
                             <span>Ruangan</span>
                             <h3 class="mb-0">
-                                {{ $totalRuangan ?? 0 }}
+                                <?php echo e($totalRuangan ?? 0); ?>
+
                             </h3>
                         </div>
 
@@ -108,7 +111,8 @@
                         <div>
                             <span>Inspeksi</span>
                             <h3 class="mb-0">
-                                {{ $totalInspeksi ?? 0 }}
+                                <?php echo e($totalInspeksi ?? 0); ?>
+
                             </h3>
                         </div>
 
@@ -128,4 +132,5 @@
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/dashboard.blade.php ENDPATH**/ ?>

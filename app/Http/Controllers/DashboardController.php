@@ -3,82 +3,94 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Inspeksi;
+use App\Models\Ruangan;
+use App\Models\Kategori;
+use App\Models\SubUraian;
 
 class DashboardController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * --------------------------------------------------------------------------
+     * DASHBOARD
+     * --------------------------------------------------------------------------
      */
+
     public function index()
     {
-        return view('dashboard');
-    }
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL DATA CARD
+        |--------------------------------------------------------------------------
+        */
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+        $totalInspeksi = Inspeksi::count();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $totalRuangan = Ruangan::count();
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+        $totalKategori = Kategori::count();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        $totalSubUraian = SubUraian::count();
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+        /*
+        |--------------------------------------------------------------------------
+        | DATA INSPEKSI TERBARU
+        |--------------------------------------------------------------------------
+        */
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $inspeksi = Inspeksi::with('ruangan')
+            ->latest()
+            ->paginate(10);
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRAFIK STATUS JAWABAN
+        |--------------------------------------------------------------------------
+        */
+
+        $totalBaik = 0;
+
+        $totalTidakBaik = 0;
+
+        foreach ($inspeksi as $item) {
+
+            $jawaban = json_decode($item->jawaban, true);
+
+            if ($jawaban) {
+
+                foreach ($jawaban as $value) {
+
+                    if ($value == 'Baik') {
+
+                        $totalBaik++;
+
+                    } else {
+
+                        $totalTidakBaik++;
+
+                    }
+                }
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        return view('dashboard', compact(
+
+            'totalInspeksi',
+            'totalRuangan',
+            'totalKategori',
+            'totalSubUraian',
+
+            'totalBaik',
+            'totalTidakBaik',
+
+            'inspeksi'
+
+        ));
     }
 }
