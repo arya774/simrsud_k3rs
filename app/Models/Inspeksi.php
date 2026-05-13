@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class Inspeksi extends Model
 {
@@ -69,27 +70,33 @@ class Inspeksi extends Model
         };
     }
 
+    private function normalizedJawaban(): array
+    {
+        $jawaban = $this->jawaban;
+
+        // kalau masih string JSON, paksa decode
+        if (is_string($jawaban)) {
+            $jawaban = json_decode($jawaban, true) ?? [];
+        }
+
+        return is_array($jawaban) ? $jawaban : [];
+    }
+
     public function getTotalChecklistAttribute()
     {
-        return is_array($this->jawaban ?? null)
-            ? count($this->jawaban)
-            : 0;
+        return count($this->normalizedJawaban());
     }
 
     public function getTotalBaikAttribute()
     {
-        if (!is_array($this->jawaban ?? null)) return 0;
-
-        return collect($this->jawaban)
+        return collect($this->normalizedJawaban())
             ->filter(fn ($value) => $value === 'Baik')
             ->count();
     }
 
     public function getTotalTidakBaikAttribute()
     {
-        if (!is_array($this->jawaban ?? null)) return 0;
-
-        return collect($this->jawaban)
+        return collect($this->normalizedJawaban())
             ->filter(fn ($value) => $value === 'Tidak Baik')
             ->count();
     }

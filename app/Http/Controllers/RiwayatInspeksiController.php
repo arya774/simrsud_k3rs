@@ -13,12 +13,10 @@ class RiwayatInspeksiController extends Controller
     */
     public function index()
     {
-        $riwayat = Inspeksi::with('ruangan')
+        $inspeksis = Inspeksi::with(['ruangan', 'kategori'])
             ->latest()
             ->get();
 
-        return view('inspeksi.riwayat', [
-            'riwayat' => $riwayat
-        ]);
+        return view('inspeksi.riwayat', compact('inspeksis'));
     }
 }
