@@ -38,7 +38,7 @@ class InspeksiController extends Controller
 
     /*
     |==========================
-    | STORE (FINAL FIX STABLE)
+    | STORE (FIXED TOTAL CHECKLIST)
     |==========================
     */
     public function store(Request $request)
@@ -53,14 +53,18 @@ class InspeksiController extends Controller
                 'jawaban'      => 'nullable|array',
             ]);
 
-            $jawaban = $request->input('jawaban', []);
+            $allSubUraian = SubUraian::pluck('id')->toArray();
 
-            // buang kosong
-            $jawaban = array_filter($jawaban, function ($v) {
-                return $v !== null && $v !== '';
-            });
+            $jawabanInput = $request->input('jawaban', []);
 
-            $total = count($jawaban);
+            // NORMALISASI: isi default kalau kosong
+            $jawaban = [];
+            foreach ($allSubUraian as $id) {
+                $jawaban[$id] = $jawabanInput[$id] ?? 'Baik'; 
+            }
+
+            // HITUNG TOTAL HARUS DARI MASTER, BUKAN DARI INPUT
+            $total = count($allSubUraian);
 
             $baik = 0;
             foreach ($jawaban as $v) {
@@ -71,7 +75,7 @@ class InspeksiController extends Controller
 
             $hasil = $total > 0 ? round(($baik / $total) * 100) : 0;
 
-            $inspeksi = Inspeksi::create([
+            Inspeksi::create([
                 'tanggal'              => $validated['tanggal'],
                 'ruangan_id'           => $validated['ruangan_id'],
                 'kategori_id'          => $validated['kategori_id'],
@@ -91,7 +95,6 @@ class InspeksiController extends Controller
                 ->with('success', 'Inspeksi berhasil disimpan');
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
 
             Log::error('STORE INSPEKSI ERROR', [
@@ -108,7 +111,7 @@ class InspeksiController extends Controller
 
     /*
     |==========================
-    | UPDATE (FINAL FIX STABLE)
+    | UPDATE (SAME FIX LOGIC)
     |==========================
     */
     public function update(Request $request, $id)
@@ -124,13 +127,15 @@ class InspeksiController extends Controller
 
             $inspeksi = Inspeksi::findOrFail($id);
 
-            $jawaban = $request->input('jawaban', []);
+            $allSubUraian = SubUraian::pluck('id')->toArray();
+            $jawabanInput = $request->input('jawaban', []);
 
-            $jawaban = array_filter($jawaban, function ($v) {
-                return $v !== null && $v !== '';
-            });
+            $jawaban = [];
+            foreach ($allSubUraian as $id) {
+                $jawaban[$id] = $jawabanInput[$id] ?? 'Baik';
+            }
 
-            $total = count($jawaban);
+            $total = count($allSubUraian);
 
             $baik = 0;
             foreach ($jawaban as $v) {
@@ -161,7 +166,6 @@ class InspeksiController extends Controller
                 ->with('success', 'Data berhasil diupdate');
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
 
             Log::error('UPDATE INSPEKSI ERROR', [

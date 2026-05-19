@@ -1,17 +1,17 @@
-@extends('layouts.dashboard.master')
 
-@section('title', 'Riwayat Inspeksi')
 
-@section('breadcrumb-title')
+<?php $__env->startSection('title', 'Riwayat Inspeksi'); ?>
+
+<?php $__env->startSection('breadcrumb-title'); ?>
 <h3>Riwayat Inspeksi</h3>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('breadcrumb-items')
+<?php $__env->startSection('breadcrumb-items'); ?>
 <li class="breadcrumb-item">Inspeksi</li>
 <li class="breadcrumb-item active">Riwayat</li>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <style>
     .history-card{
@@ -114,13 +114,14 @@
 
                 <div class="card-body p-4">
 
-                    @if(session('success'))
+                    <?php if(session('success')): ?>
                         <div class="alert alert-success border-0 rounded-4 shadow-sm">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+                            <?php echo e(session('success')); ?>
 
-                    @if($inspeksis->count() > 0)
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if($inspeksis->count() > 0): ?>
 
                         <div class="table-responsive">
 
@@ -140,64 +141,68 @@
 
                                 <tbody>
 
-                                    @foreach($inspeksis as $item)
+                                    <?php $__currentLoopData = $inspeksis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                                         <tr>
 
-                                            <td>{{ $loop->iteration }}</td>
+                                            <td><?php echo e($loop->iteration); ?></td>
 
                                             <td>
                                                 <span class="badge-custom">
-                                                    {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
+                                                    <?php echo e(\Carbon\Carbon::parse($item->tanggal)->format('d M Y')); ?>
+
                                                 </span>
                                             </td>
 
                                             <td>
                                                 <strong>
-                                                    {{ $item->ruangan->nama_ruangan ?? '-' }}
+                                                    <?php echo e($item->ruangan->nama_ruangan ?? '-'); ?>
+
                                                 </strong>
                                             </td>
 
                                             <td>
-                                                {{ $item->nama_petugas_k3rs ?? '-' }}
+                                                <?php echo e($item->nama_petugas_k3rs ?? '-'); ?>
+
                                             </td>
 
                                             <td>
-                                                {{ $item->nama_petugas_ruangan ?? '-' }}
+                                                <?php echo e($item->nama_petugas_ruangan ?? '-'); ?>
+
                                             </td>
 
                                             <td>
-                                                @php
+                                                <?php
                                                     $jumlahJawaban = is_array($item->jawaban)
                                                         ? count($item->jawaban)
                                                         : 0;
-                                                @endphp
+                                                ?>
 
                                                 <span class="badge-custom">
-                                                    {{ $jumlahJawaban }} Checklist
+                                                    <?php echo e($jumlahJawaban); ?> Checklist
                                                 </span>
                                             </td>
 
-                                            {{-- AKSI UPGRADE --}}
+                                            
                                             <td class="text-center">
 
-                                                <a href="{{ route('inspeksi.hasil', $item->id) }}"
+                                                <a href="<?php echo e(route('inspeksi.hasil', $item->id)); ?>"
                                                    class="btn btn-sm btn-primary btn-detail">
                                                     Detail
                                                 </a>
 
-                                                <a href="{{ route('inspeksi.edit', $item->id) }}"
+                                                <a href="<?php echo e(route('inspeksi.edit', $item->id)); ?>"
                                                    class="btn btn-sm btn-edit">
                                                     Edit
                                                 </a>
 
-                                                <form action="{{ route('inspeksi.destroy', $item->id) }}"
+                                                <form action="<?php echo e(route('inspeksi.destroy', $item->id)); ?>"
                                                       method="POST"
                                                       style="display:inline-block"
                                                       onsubmit="return confirm('Yakin ingin menghapus data ini?')">
 
-                                                    @csrf
-                                                    @method('DELETE')
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
 
                                                     <button type="submit"
                                                             class="btn btn-sm btn-delete">
@@ -210,7 +215,7 @@
 
                                         </tr>
 
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                 </tbody>
 
@@ -218,7 +223,7 @@
 
                         </div>
 
-                    @else
+                    <?php else: ?>
 
                         <div class="empty-box">
 
@@ -232,7 +237,7 @@
 
                         </div>
 
-                    @endif
+                    <?php endif; ?>
 
                 </div>
 
@@ -242,4 +247,5 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/inspeksi/riwayat.blade.php ENDPATH**/ ?>

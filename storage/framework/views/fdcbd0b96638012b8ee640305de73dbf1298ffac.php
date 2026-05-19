@@ -1,14 +1,14 @@
-@extends('layouts.dashboard.master')
 
-@section('title', 'Form Inspeksi')
 
-@section('breadcrumb-title')
+<?php $__env->startSection('title', 'Form Inspeksi'); ?>
+
+<?php $__env->startSection('breadcrumb-title'); ?>
 
 <h3>Form Inspeksi</h3>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('breadcrumb-items')
+<?php $__env->startSection('breadcrumb-items'); ?>
 
 <li class="breadcrumb-item">
     Inspeksi
@@ -18,9 +18,9 @@
     Form Inspeksi
 </li>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <style>
 
@@ -174,7 +174,7 @@
 
             <div class="card inspection-card">
 
-                {{-- HEADER --}}
+                
                 <div class="inspection-header">
 
                     <h3>
@@ -187,50 +187,51 @@
 
                 </div>
 
-                {{-- BODY --}}
+                
                 <div class="card-body p-4">
 
-                    {{-- SUCCESS --}}
-                    @if(session('success'))
+                    
+                    <?php if(session('success')): ?>
 
                         <div class="alert alert-success">
 
-                            {{ session('success') }}
+                            <?php echo e(session('success')); ?>
+
 
                         </div>
 
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- ERROR --}}
-                    @if ($errors->any())
+                    
+                    <?php if($errors->any()): ?>
 
                         <div class="alert alert-danger">
 
                             <ul class="mb-0">
 
-                                @foreach ($errors->all() as $error)
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                                    <li>{{ $error }}</li>
+                                    <li><?php echo e($error); ?></li>
 
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                             </ul>
 
                         </div>
 
-                    @endif
+                    <?php endif; ?>
 
-                    <form action="{{ route('inspeksi.store') }}"
+                    <form action="<?php echo e(route('inspeksi.store')); ?>"
                           method="POST">
 
-                        @csrf
+                        <?php echo csrf_field(); ?>
 
-                        {{-- FILTER --}}
+                        
                         <div class="filter-box">
 
                             <div class="row">
 
-                                {{-- TANGGAL --}}
+                                
                                 <div class="col-lg-4 mb-3">
 
                                     <label class="form-label">
@@ -240,12 +241,12 @@
                                     <input type="date"
                                            name="tanggal"
                                            class="form-control"
-                                           value="{{ old('tanggal', date('Y-m-d')) }}"
+                                           value="<?php echo e(old('tanggal', date('Y-m-d'))); ?>"
                                            required>
 
                                 </div>
 
-                                {{-- RUANGAN --}}
+                                
                                 <div class="col-lg-4 mb-3">
 
                                     <label class="form-label">
@@ -260,21 +261,22 @@
                                             -- Pilih Ruangan --
                                         </option>
 
-                                        @foreach($ruangan as $item)
+                                        <?php $__currentLoopData = $ruangan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                                            <option value="{{ $item->id }}">
+                                            <option value="<?php echo e($item->id); ?>">
 
-                                                {{ $item->nama_ruangan }}
+                                                <?php echo e($item->nama_ruangan); ?>
+
 
                                             </option>
 
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                     </select>
 
                                 </div>
 
-                                {{-- KATEGORI --}}
+                                
                                 <div class="col-lg-4 mb-3">
 
                                     <label class="form-label">
@@ -290,15 +292,16 @@
                                             -- Pilih Kategori --
                                         </option>
 
-                                        @foreach($kategori as $item)
+                                        <?php $__currentLoopData = $kategori; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                                            <option value="{{ $item->id }}">
+                                            <option value="<?php echo e($item->id); ?>">
 
-                                                {{ $item->nama_kategori }}
+                                                <?php echo e($item->nama_kategori); ?>
+
 
                                             </option>
 
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                     </select>
 
@@ -308,11 +311,11 @@
 
                         </div>
 
-                        {{-- PERTANYAAN --}}
-                        @foreach($kategori as $kategoriItem)
+                        
+                        <?php $__currentLoopData = $kategori; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kategoriItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                             <div class="kategori-group d-none"
-                                 id="kategori-{{ $kategoriItem->id }}">
+                                 id="kategori-<?php echo e($kategoriItem->id); ?>">
 
                                 <div class="kategori-card">
 
@@ -320,7 +323,8 @@
 
                                         <h4 class="kategori-title">
 
-                                            {{ $kategoriItem->nama_kategori }}
+                                            <?php echo e($kategoriItem->nama_kategori); ?>
+
 
                                         </h4>
 
@@ -328,13 +332,14 @@
 
                                     <div class="card-body p-4">
 
-                                        @foreach($uraian->where('kategori_id', $kategoriItem->id) as $uraianItem)
+                                        <?php $__currentLoopData = $uraian->where('kategori_id', $kategoriItem->id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $uraianItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                                             <div class="uraian-box">
 
                                                 <h5 class="uraian-title">
 
-                                                    {{ $uraianItem->nama_uraian }}
+                                                    <?php echo e($uraianItem->nama_uraian); ?>
+
 
                                                 </h5>
 
@@ -364,7 +369,7 @@
 
                                                         <tbody>
 
-                                                            @foreach($subUraian->where('uraian_id', $uraianItem->id) as $sub)
+                                                            <?php $__currentLoopData = $subUraian->where('uraian_id', $uraianItem->id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                                                                 <tr>
 
@@ -372,7 +377,8 @@
 
                                                                         <div class="question-text">
 
-                                                                            {{ $sub->nama_sub_uraian }}
+                                                                            <?php echo e($sub->nama_sub_uraian); ?>
+
 
                                                                         </div>
 
@@ -382,7 +388,7 @@
 
                                                                         <input class="form-check-input custom-radio"
                                                                                type="radio"
-                                                                               name="jawaban[{{ $sub->id }}]"
+                                                                               name="jawaban[<?php echo e($sub->id); ?>]"
                                                                                value="Baik">
 
                                                                     </td>
@@ -391,14 +397,14 @@
 
                                                                         <input class="form-check-input custom-radio"
                                                                                type="radio"
-                                                                               name="jawaban[{{ $sub->id }}]"
+                                                                               name="jawaban[<?php echo e($sub->id); ?>]"
                                                                                value="Tidak Baik">
 
                                                                     </td>
 
                                                                 </tr>
 
-                                                            @endforeach
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                                         </tbody>
 
@@ -408,7 +414,7 @@
 
                                             </div>
 
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                     </div>
 
@@ -416,9 +422,9 @@
 
                             </div>
 
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                        {{-- KETERANGAN --}}
+                        
                         <div class="mb-4">
 
                             <label class="form-label">
@@ -431,10 +437,10 @@
 
                         </div>
 
-                        {{-- TTD --}}
+                        
                         <div class="row">
 
-                            {{-- PETUGAS K3RS --}}
+                            
                             <div class="col-lg-6 mb-4">
 
                                 <div class="signature-card">
@@ -470,7 +476,7 @@
 
                             </div>
 
-                            {{-- PETUGAS RUANGAN --}}
+                            
                             <div class="col-lg-6 mb-4">
 
                                 <div class="signature-card">
@@ -508,7 +514,7 @@
 
                         </div>
 
-                        {{-- BUTTON --}}
+                        
                         <button type="submit"
                                 class="btn btn-primary btn-simpan">
 
@@ -528,9 +534,9 @@
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 
 <script>
 
@@ -695,4 +701,5 @@
 
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/inspeksi/index.blade.php ENDPATH**/ ?>
