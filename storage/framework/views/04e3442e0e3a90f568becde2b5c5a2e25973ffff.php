@@ -1,8 +1,6 @@
-@extends('layouts.authentication.master')
+<?php $__env->startSection('title', 'NAMA APLIKASI - RSUD Kota Bogor'); ?>
 
-@section('title', 'NAMA APLIKASI - RSUD Kota Bogor')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <style>
 
@@ -57,7 +55,7 @@
         animation:bgAnimation 15s ease infinite;
     }
 
-    @keyframes bgAnimation{
+    @keyframes  bgAnimation{
 
         0%{
             background-position:0% 50%;
@@ -131,7 +129,7 @@
         animation:floating2 12s ease-in-out infinite;
     }
 
-    @keyframes floating1{
+    @keyframes  floating1{
 
         0%{
             transform:translateY(0px);
@@ -147,7 +145,7 @@
 
     }
 
-    @keyframes floating2{
+    @keyframes  floating2{
 
         0%{
             transform:translateY(0px);
@@ -191,7 +189,7 @@
         animation:fadeIn 1s ease;
     }
 
-    @keyframes fadeIn{
+    @keyframes  fadeIn{
 
         from{
             opacity:0;
@@ -272,7 +270,7 @@
         transform:scale(1.05);
     }
 
-    @keyframes logoFloat{
+    @keyframes  logoFloat{
 
         0%{
             transform:translateY(0px);
@@ -421,7 +419,7 @@
         transition:0.3s;
     }
 
-    @keyframes buttonGradient{
+    @keyframes  buttonGradient{
 
         0%{
             background-position:0% 50%;
@@ -526,7 +524,7 @@
             <div class="logo-wrapper">
 
                 <img
-                    src="{{ asset('assets/images/logo/logo-rsud.png') }}"
+                    src="<?php echo e(asset('assets/images/logo/logo-rsud.png')); ?>"
                     alt="Logo RSUD"
                     class="logo-rs"
                 >
@@ -541,31 +539,32 @@
 
         <form
             class="theme-form"
-            action="{{ route('login.store') }}"
+            action="<?php echo e(route('login.store')); ?>"
             method="POST"
         >
 
-            @csrf
+            <?php echo csrf_field(); ?>
 
             <h4 class="login-title">
                 Masuk ke Sistem
             </h4>
 
-            @if (session('status'))
+            <?php if(session('status')): ?>
                 <div class="alert-success-custom">
-                    {{ session('status') }}
-                </div>
-            @endif
+                    <?php echo e(session('status')); ?>
 
-            @if ($errors->any())
+                </div>
+            <?php endif; ?>
+
+            <?php if($errors->any()): ?>
                 <div class="alert-danger-custom">
                     <ul>
-                        @foreach ($errors->all() as $e)
-                            <li>{{ $e }}</li>
-                        @endforeach
+                        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $e): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <li><?php echo e($e); ?></li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="form-group">
 
@@ -605,4 +604,6 @@
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.authentication.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/auth/login.blade.php ENDPATH**/ ?>

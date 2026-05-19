@@ -13,20 +13,216 @@
 
 @section('content')
 
+<style>
+
+    body{
+        background:#f4f7fb;
+    }
+
+    .main-card{
+        border:none;
+        border-radius:28px;
+        overflow:hidden;
+        background:#ffffff;
+        box-shadow:0 10px 40px rgba(0,0,0,0.08);
+    }
+
+    .header-gradient{
+        background:linear-gradient(135deg,#4f46e5,#2563eb);
+        padding:32px;
+        color:white;
+    }
+
+    .header-gradient h3{
+        font-weight:700;
+        margin-bottom:6px;
+    }
+
+    .header-gradient small{
+        opacity:0.8;
+    }
+
+    .btn-add{
+        background:white;
+        color:#2563eb;
+        border:none;
+        border-radius:16px;
+        padding:12px 22px;
+        font-weight:600;
+        transition:0.3s;
+    }
+
+    .btn-add:hover{
+        transform:translateY(-2px);
+        background:#f8fafc;
+    }
+
+    .search-box{
+        border:none;
+        background:#eef2ff;
+        border-radius:16px;
+        padding:14px 18px;
+        font-size:15px;
+    }
+
+    .search-box:focus{
+        background:#e0e7ff;
+        box-shadow:none;
+    }
+
+    .table-modern{
+        border-collapse:separate;
+        border-spacing:0 16px;
+    }
+
+    .table-modern thead th{
+        border:none;
+        color:#64748b;
+        font-size:14px;
+        font-weight:700;
+        padding:0 18px;
+    }
+
+    .table-modern tbody tr{
+        background:#fff;
+        border-radius:18px;
+        box-shadow:0 5px 18px rgba(0,0,0,0.05);
+        transition:0.3s;
+    }
+
+    .table-modern tbody tr:hover{
+        transform:translateY(-3px);
+        box-shadow:0 10px 24px rgba(0,0,0,0.08);
+    }
+
+    .table-modern td{
+        border:none !important;
+        vertical-align:middle;
+        padding:20px 18px;
+        color:#0f172a;
+        font-weight:600;
+    }
+
+    .number-badge{
+        width:40px;
+        height:40px;
+        border-radius:14px;
+        background:#eef2ff;
+        color:#4338ca;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:700;
+    }
+
+    .sub-title{
+        font-size:16px;
+        font-weight:700;
+        color:#0f172a;
+    }
+
+    .action-group{
+        display:flex;
+        justify-content:center;
+        gap:10px;
+    }
+
+    .btn-action{
+        border:none;
+        border-radius:14px;
+        padding:10px 16px;
+        font-weight:600;
+        display:flex;
+        align-items:center;
+        gap:6px;
+        transition:0.3s;
+    }
+
+    .btn-action:hover{
+        transform:translateY(-2px);
+    }
+
+    .btn-edit{
+        background:#facc15;
+        color:#000;
+    }
+
+    .btn-delete{
+        background:#ef4444;
+        color:white;
+    }
+
+    .btn-save{
+        background:#2563eb;
+        color:white;
+        border:none;
+        border-radius:14px;
+        padding:10px 20px;
+        font-weight:600;
+    }
+
+    .modal-content{
+        border:none;
+        border-radius:24px;
+    }
+
+    .modal-header{
+        border:none;
+        padding-bottom:0;
+    }
+
+    .modal-footer{
+        border:none;
+    }
+
+    .form-control{
+        border-radius:14px;
+        padding:12px 14px;
+    }
+
+    .form-control:focus{
+        box-shadow:none;
+        border-color:#4f46e5;
+    }
+
+    @media(max-width:768px){
+
+        .header-gradient{
+            padding:22px;
+        }
+
+        .btn-add{
+            width:100%;
+        }
+
+        .table-modern td{
+            padding:14px;
+        }
+
+        .btn-action{
+            width:100%;
+            justify-content:center;
+        }
+
+        .action-group{
+            flex-direction:column;
+        }
+
+    }
+
+</style>
+
 <div class="container-fluid">
 
-    <div class="card border-0 shadow rounded-4 overflow-hidden">
+    <div class="main-card">
 
-        <!-- HEADER -->
-        <div class="card-header bg-primary text-white p-4">
+        <div class="header-gradient">
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
                 <div>
 
-                    <h3 class="fw-bold mb-1">
-                        Data Sub Uraian
-                    </h3>
+                    <h3>Data Sub Uraian</h3>
 
                     <small>
                         Kelola data sub uraian inspeksi rumah sakit
@@ -35,9 +231,10 @@
                 </div>
 
                 <a href="{{ route('master-data.sub-uraian.create') }}"
-                   class="btn btn-light rounded-3 px-4 py-2 fw-semibold">
+                   class="btn-add d-flex align-items-center gap-2">
 
                     <i data-feather="plus-circle"></i>
+
                     Tambah Sub Uraian
 
                 </a>
@@ -46,13 +243,14 @@
 
         </div>
 
-        <!-- BODY -->
-        <div class="card-body p-4">
+        <div class="p-4">
 
             @if(session('success'))
 
-                <div class="alert alert-success rounded-4 border-0 shadow-sm">
+                <div class="alert alert-success border-0 rounded-4 shadow-sm">
+
                     {{ session('success') }}
+
                 </div>
 
             @endif
@@ -60,26 +258,29 @@
             <div class="mb-4">
 
                 <input type="text"
-                       id="searchSub"
-                       class="form-control rounded-4"
-                       placeholder="Cari sub uraian..."
-                       style="padding:14px;">
+                       id="searchInput"
+                       class="form-control search-box"
+                       placeholder="Cari sub uraian...">
 
             </div>
 
             <div class="table-responsive">
 
-                <table class="table table-hover align-middle">
+                <table class="table table-modern">
 
-                    <thead class="table-light">
+                    <thead>
 
                         <tr>
 
-                            <th width="70">No</th>
+                            <th width="80">No</th>
+
                             <th>Kategori</th>
+
                             <th>Uraian</th>
+
                             <th>Sub Uraian</th>
-                            <th width="220" class="text-center">
+
+                            <th width="260" class="text-center">
                                 Aksi
                             </th>
 
@@ -87,23 +288,25 @@
 
                     </thead>
 
-                    <tbody id="subTable">
+                    <tbody id="tableBody">
 
                         @forelse($data as $item)
 
                             <tr>
 
                                 <td>
-                                    {{ $loop->iteration }}
+
+                                    <div class="number-badge">
+
+                                        {{ $loop->iteration }}
+
+                                    </div>
+
                                 </td>
 
                                 <td>
 
-                                    <span class="badge bg-primary rounded-pill px-3 py-2">
-
-                                        {{ $item->uraian->kategori->nama_kategori ?? '-' }}
-
-                                    </span>
+                                    {{ $item->uraian->kategori->nama_kategori ?? '-' }}
 
                                 </td>
 
@@ -115,28 +318,29 @@
 
                                 <td>
 
-                                    <strong>
+                                    <div class="sub-title">
+
                                         {{ $item->nama_sub_uraian }}
-                                    </strong>
+
+                                    </div>
 
                                 </td>
 
                                 <td>
 
-                                    <div class="d-flex justify-content-center gap-2">
+                                    <div class="action-group">
 
-                                        <!-- EDIT -->
                                         <button
-                                            class="btn btn-warning rounded-3 d-flex align-items-center gap-1"
+                                            class="btn-action btn-edit"
                                             data-bs-toggle="modal"
                                             data-bs-target="#editModal{{ $item->id }}">
 
                                             <i data-feather="edit-2"></i>
+
                                             Edit
 
                                         </button>
 
-                                        <!-- DELETE -->
                                         <form action="{{ route('master-data.sub-uraian.destroy', $item->id) }}"
                                               method="POST"
                                               onsubmit="return confirm('Yakin ingin menghapus data ini?')">
@@ -145,9 +349,10 @@
                                             @method('DELETE')
 
                                             <button type="submit"
-                                                    class="btn btn-danger rounded-3 d-flex align-items-center gap-1">
+                                                    class="btn-action btn-delete">
 
                                                 <i data-feather="trash-2"></i>
+
                                                 Hapus
 
                                             </button>
@@ -160,91 +365,19 @@
 
                             </tr>
 
-                            <!-- MODAL EDIT -->
-                            <div class="modal fade"
-                                 id="editModal{{ $item->id }}"
-                                 tabindex="-1">
-
-                                <div class="modal-dialog modal-dialog-centered">
-
-                                    <div class="modal-content rounded-4 border-0">
-
-                                        <div class="modal-header border-0">
-
-                                            <h5 class="fw-bold">
-                                                Edit Sub Uraian
-                                            </h5>
-
-                                            <button type="button"
-                                                    class="btn-close"
-                                                    data-bs-dismiss="modal"></button>
-
-                                        </div>
-
-                                        <form action="{{ route('master-data.sub-uraian.update', $item->id) }}"
-                                              method="POST">
-
-                                            @csrf
-                                            @method('PUT')
-
-                                            <div class="modal-body">
-
-                                                <div class="mb-3">
-
-                                                    <label class="form-label">
-                                                        Nama Sub Uraian
-                                                    </label>
-
-                                                    <input type="text"
-                                                           name="nama_sub_uraian"
-                                                           class="form-control rounded-3"
-                                                           value="{{ $item->nama_sub_uraian }}"
-                                                           required>
-
-                                                </div>
-
-                                            </div>
-
-                                            <div class="modal-footer border-0">
-
-                                                <button type="button"
-                                                        class="btn btn-light rounded-3"
-                                                        data-bs-dismiss="modal">
-
-                                                    Batal
-
-                                                </button>
-
-                                                <button type="submit"
-                                                        class="btn btn-primary rounded-3">
-
-                                                    Update Data
-
-                                                </button>
-
-                                            </div>
-
-                                        </form>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
                         @empty
 
                             <tr>
 
-                                <td colspan="5"
-                                    class="text-center py-5 text-muted">
+                                <td colspan="5">
 
-                                    <i data-feather="inbox"
-                                       style="width:40px;height:40px;"></i>
+                                    <div class="text-center py-5 text-muted">
 
-                                    <p class="mt-2 mb-0">
-                                        Belum ada data sub uraian
-                                    </p>
+                                        <h5 class="fw-bold">
+                                            Belum Ada Data
+                                        </h5>
+
+                                    </div>
 
                                 </td>
 
@@ -266,25 +399,37 @@
 
 <script>
 
+document.addEventListener('DOMContentLoaded', function () {
+
     feather.replace();
 
-    document.getElementById('searchSub')
-    .addEventListener('keyup', function(){
+    const searchInput = document.getElementById('searchInput');
 
-        let value = this.value.toLowerCase();
+    if(searchInput){
 
-        let rows = document.querySelectorAll('#subTable tr');
+        searchInput.addEventListener('keyup', function(){
 
-        rows.forEach(row => {
+            const value = this.value.toLowerCase();
 
-            row.style.display =
-                row.innerText.toLowerCase().includes(value)
-                ? ''
-                : 'none';
+            const rows = document.querySelectorAll('#tableBody tr');
+
+            rows.forEach(function(row){
+
+                const text = row.innerText.toLowerCase();
+
+                if(text.includes(value)){
+                    row.style.display = '';
+                }else{
+                    row.style.display = 'none';
+                }
+
+            });
 
         });
 
-    });
+    }
+
+});
 
 </script>
 

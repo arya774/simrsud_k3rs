@@ -1,17 +1,15 @@
-@extends('layouts.dashboard.master')
+<?php $__env->startSection('title', 'Data Uraian'); ?>
 
-@section('title', 'Data Uraian')
-
-@section('breadcrumb-title')
+<?php $__env->startSection('breadcrumb-title'); ?>
 <h3 class="fw-bold">Data Uraian</h3>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('breadcrumb-items')
+<?php $__env->startSection('breadcrumb-items'); ?>
 <li class="breadcrumb-item">Master Data</li>
 <li class="breadcrumb-item active">Uraian</li>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <style>
 
@@ -230,7 +228,7 @@
 
                 </div>
 
-                <a href="{{ route('master-data.uraian.create') }}"
+                <a href="<?php echo e(route('master-data.uraian.create')); ?>"
                    class="btn-add d-flex align-items-center gap-2">
 
                     <i data-feather="plus-circle"></i>
@@ -245,15 +243,16 @@
 
         <div class="p-4">
 
-            @if(session('success'))
+            <?php if(session('success')): ?>
 
                 <div class="alert alert-success border-0 rounded-4 shadow-sm">
 
-                    {{ session('success') }}
+                    <?php echo e(session('success')); ?>
+
 
                 </div>
 
-            @endif
+            <?php endif; ?>
 
             <div class="mb-4">
 
@@ -288,7 +287,7 @@
 
                     <tbody id="tableBody">
 
-                        @forelse($data as $item)
+                        <?php $__empty_1 = true; $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
                             <tr>
 
@@ -296,7 +295,8 @@
 
                                     <div class="number-badge">
 
-                                        {{ $loop->iteration }}
+                                        <?php echo e($loop->iteration); ?>
+
 
                                     </div>
 
@@ -304,7 +304,8 @@
 
                                 <td>
 
-                                    {{ $item->kategori->nama_kategori ?? '-' }}
+                                    <?php echo e($item->kategori->nama_kategori ?? '-'); ?>
+
 
                                 </td>
 
@@ -312,7 +313,8 @@
 
                                     <div class="uraian-title">
 
-                                        {{ $item->nama_uraian }}
+                                        <?php echo e($item->nama_uraian); ?>
+
 
                                     </div>
 
@@ -325,7 +327,7 @@
                                         <button
                                             class="btn-action btn-edit"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#editModal{{ $item->id }}">
+                                            data-bs-target="#editModal<?php echo e($item->id); ?>">
 
                                             <i data-feather="edit-2"></i>
 
@@ -333,12 +335,12 @@
 
                                         </button>
 
-                                        <form action="{{ route('master-data.uraian.destroy', $item->id) }}"
+                                        <form action="<?php echo e(route('master-data.uraian.destroy', $item->id)); ?>"
                                               method="POST"
                                               onsubmit="return confirm('Yakin ingin menghapus data ini?')">
 
-                                            @csrf
-                                            @method('DELETE')
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('DELETE'); ?>
 
                                             <button type="submit"
                                                     class="btn-action btn-delete">
@@ -357,7 +359,7 @@
 
                             </tr>
 
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                             <tr>
 
@@ -375,7 +377,7 @@
 
                             </tr>
 
-                        @endforelse
+                        <?php endif; ?>
 
                     </tbody>
 
@@ -425,4 +427,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/uraian/index.blade.php ENDPATH**/ ?>

@@ -7,4 +7,4 @@
 		    </div>
 	  </div>
 </footer>
-<?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/layouts/dashboard/footer.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\xampp\htdocs\simrsud_k3rs-main\simrsud_k3rs\resources\views/layouts/dashboard/footer.blade.php ENDPATH**/ ?>
