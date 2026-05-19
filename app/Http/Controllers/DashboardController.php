@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\Inspeksi;
 use App\Models\Ruangan;
 use App\Models\Kategori;
@@ -33,6 +35,19 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | GRAFIK INSPEKSI BULANAN
+        |--------------------------------------------------------------------------
+        */
+        $chart = Inspeksi::select(
+                DB::raw('MONTH(created_at) as bulan'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
         | GRAFIK STATUS JAWABAN
         |--------------------------------------------------------------------------
         */
@@ -41,7 +56,7 @@ class DashboardController extends Controller
 
         foreach ($inspeksi as $item) {
 
-            // ❗ SUDAH ARRAY (karena cast di model)
+            // karena jawaban sudah cast array di model
             $jawaban = $item->jawaban ?? [];
 
             if (is_array($jawaban)) {
@@ -69,7 +84,8 @@ class DashboardController extends Controller
             'totalSubUraian',
             'totalBaik',
             'totalTidakBaik',
-            'inspeksi'
+            'inspeksi',
+            'chart'
         ));
     }
 }
