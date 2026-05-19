@@ -133,12 +133,48 @@
         border-color:#eef2f7;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | HEADER KATEGORI
+    |--------------------------------------------------------------------------
+    */
+
+   .kategori-row{
+    background:#f8fafc;
+    border-top:2px solid #e2e8f0;
+}
+
+.kategori-title{
+    color:#0f172a;
+    font-size:16px;
+    font-weight:700;
+    padding:16px !important;
+    letter-spacing:.3px;
+}
+    /*
+    |--------------------------------------------------------------------------
+    | HEADER URAIAN
+    |--------------------------------------------------------------------------
+    */
+
+    .uraian-row{
+        background:#f1f5f9;
+    }
+
+    .uraian-title{
+        font-size:15px;
+        font-weight:700;
+        color:#0f172a;
+        padding:14px 16px !important;
+    }
+
     .badge-baik{
         background:#dcfce7;
         color:#166534;
         padding:8px 14px;
         border-radius:12px;
         font-weight:700;
+        display:inline-block;
     }
 
     .badge-tidak{
@@ -147,6 +183,7 @@
         padding:8px 14px;
         border-radius:12px;
         font-weight:700;
+        display:inline-block;
     }
 
     .signature-card{
@@ -155,6 +192,7 @@
         padding:24px;
         text-align:center;
         background:#fff;
+        height:100%;
     }
 
     .signature-card img{
@@ -162,6 +200,10 @@
         height:180px;
         object-fit:contain;
         margin-top:15px;
+        border-radius:12px;
+        border:1px solid #e2e8f0;
+        padding:10px;
+        background:white;
     }
 
     .section-title{
@@ -169,6 +211,22 @@
         font-weight:700;
         margin-bottom:20px;
         color:#1e293b;
+    }
+
+    .empty-data{
+        text-align:center;
+        padding:30px;
+        color:#94a3b8;
+        font-weight:600;
+    }
+
+    .catatan-box{
+        background:#f8fafc;
+        border-radius:16px;
+        padding:20px;
+        border:1px solid #e2e8f0;
+        line-height:1.8;
+        color:#475569;
     }
 
     @media(max-width:768px){
@@ -189,8 +247,7 @@
 
 <div class="container-fluid">
 
-    <!-- HEADER -->
-
+    
     <div class="card result-card mb-4">
 
         <div class="result-header">
@@ -207,8 +264,7 @@
 
     </div>
 
-    <!-- INFO -->
-
+    
     <div class="row mb-4">
 
         <div class="col-lg-3 mb-3">
@@ -301,8 +357,7 @@
 
     </div>
 
-    <!-- CHECKLIST -->
-
+    
     <div class="card result-card mb-4">
 
         <div class="card-body p-4">
@@ -313,6 +368,34 @@
 
             </div>
 
+            <?php
+
+                /*
+                |--------------------------------------------------------------------------
+                | FILTER YANG SUDAH DIISI SAJA
+                |--------------------------------------------------------------------------
+                */
+
+                $filtered = $subUraian->filter(function ($item) use ($jawaban) {
+
+                    return isset($jawaban[$item->id]);
+
+                });
+
+                /*
+                |--------------------------------------------------------------------------
+                | GROUP BERDASARKAN KATEGORI -> URAIAN
+                |--------------------------------------------------------------------------
+                */
+
+                $grouped = $filtered->groupBy(function ($item) {
+
+                    return $item->uraian->kategori->nama_kategori ?? 'Kategori';
+
+                });
+
+            ?>
+
             <div class="table-responsive">
 
                 <table class="table align-middle">
@@ -321,12 +404,8 @@
 
                         <tr>
 
-                            <th width="5%">
+                            <th width="8%">
                                 No
-                            </th>
-
-                            <th width="30%">
-                                Uraian
                             </th>
 
                             <th>
@@ -343,32 +422,46 @@
 
                     <tbody>
 
-                        <?php $__currentLoopData = $subUraian; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php $__empty_1 = true; $__currentLoopData = $grouped; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $namaKategori => $kategoriItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
-                            <tr>
+                            
+                            <tr class="kategori-row">
 
-                                <td>
+                                <td colspan="3" class="kategori-title">
 
-                                    <?php echo e($loop->iteration); ?>
-
-
-                                </td>
-
-                                <td>
-
-                                    <?php echo e($item->uraian->nama_uraian ?? '-'); ?>
+                                    <?php echo e($namaKategori); ?>
 
 
                                 </td>
 
-                                <td>
+                            </tr>
 
-                                    <?php echo e($item->nama_sub_uraian); ?>
+                            <?php
+
+                                $groupUraian = $kategoriItems->groupBy(function ($item) {
+
+                                    return $item->uraian->nama_uraian ?? 'Lainnya';
+
+                                });
+
+                            ?>
+
+                            <?php $__currentLoopData = $groupUraian; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $namaUraian => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+
+                                
+                                <tr class="uraian-row">
+
+                                    <td colspan="3" class="uraian-title">
+
+                                        <?php echo e($namaUraian); ?>
 
 
-                                </td>
+                                    </td>
 
-                                <td>
+                                </tr>
+
+                                
+                                <?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                                     <?php
 
@@ -376,33 +469,67 @@
 
                                     ?>
 
-                                    <?php if($value == 'Baik'): ?>
+                                    <tr>
 
-                                        <span class="badge-baik">
+                                        <td>
 
-                                            Baik
+                                            <?php echo e($loop->iteration); ?>
 
-                                        </span>
 
-                                    <?php elseif($value == 'Tidak Baik'): ?>
+                                        </td>
 
-                                        <span class="badge-tidak">
+                                        <td>
 
-                                            Tidak Baik
+                                            <?php echo e($item->nama_sub_uraian); ?>
 
-                                        </span>
 
-                                    <?php else: ?>
+                                        </td>
 
-                                        -
+                                        <td>
 
-                                    <?php endif; ?>
+                                            <?php if($value == 'Baik'): ?>
+
+                                                <span class="badge-baik">
+
+                                                    Baik
+
+                                                </span>
+
+                                            <?php elseif($value == 'Tidak Baik'): ?>
+
+                                                <span class="badge-tidak">
+
+                                                    Tidak Baik
+
+                                                </span>
+
+                                            <?php else: ?>
+
+                                                -
+
+                                            <?php endif; ?>
+
+                                        </td>
+
+                                    </tr>
+
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+
+                            <tr>
+
+                                <td colspan="3" class="empty-data">
+
+                                    Tidak ada data checklist inspeksi.
 
                                 </td>
 
                             </tr>
 
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endif; ?>
 
                     </tbody>
 
@@ -414,8 +541,7 @@
 
     </div>
 
-    <!-- CATATAN -->
-
+    
     <div class="card result-card mb-4">
 
         <div class="card-body p-4">
@@ -426,7 +552,7 @@
 
             </div>
 
-            <div style="line-height:1.8; color:#475569;">
+            <div class="catatan-box">
 
                 <?php echo e($inspeksi->keterangan ?? 'Tidak ada catatan inspeksi.'); ?>
 
@@ -437,12 +563,10 @@
 
     </div>
 
-    <!-- TTD -->
-
+    
     <div class="row">
 
-        <!-- K3RS -->
-
+        
         <div class="col-lg-6 mb-4">
 
             <div class="signature-card">
@@ -462,13 +586,17 @@
 
                 <?php if($inspeksi->ttd_k3rs): ?>
 
-                    <img src="<?php echo e($inspeksi->ttd_k3rs); ?>"
-                         alt="TTD K3RS">
+                    <img
+                        src="<?php echo e($inspeksi->ttd_k3rs); ?>"
+                        alt="TTD K3RS"
+                    >
 
                 <?php else: ?>
 
                     <div class="text-muted">
+
                         Tidak ada tanda tangan
+
                     </div>
 
                 <?php endif; ?>
@@ -477,8 +605,7 @@
 
         </div>
 
-        <!-- RUANGAN -->
-
+        
         <div class="col-lg-6 mb-4">
 
             <div class="signature-card">
@@ -498,13 +625,17 @@
 
                 <?php if($inspeksi->ttd_ruangan): ?>
 
-                    <img src="<?php echo e($inspeksi->ttd_ruangan); ?>"
-                         alt="TTD Ruangan">
+                    <img
+                        src="<?php echo e($inspeksi->ttd_ruangan); ?>"
+                        alt="TTD Ruangan"
+                    >
 
                 <?php else: ?>
 
                     <div class="text-muted">
+
                         Tidak ada tanda tangan
+
                     </div>
 
                 <?php endif; ?>

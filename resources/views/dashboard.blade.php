@@ -19,11 +19,15 @@
 
                 <div class="card-body p-4 position-relative">
 
-                    <div class="row align-items-center">
+                    <!-- SHAPE -->
+                    <div class="welcome-shape shape-1"></div>
+                    <div class="welcome-shape shape-2"></div>
+
+                    <div class="row align-items-center position-relative">
 
                         <div class="col-lg-8">
 
-                            <span class="badge bg-light text-primary px-3 py-2 rounded-pill mb-3">
+                            <span class="badge bg-light text-primary px-3 py-2 rounded-pill mb-3 fw-semibold">
                                 Sistem Monitoring RSUD
                             </span>
 
@@ -32,10 +36,25 @@
                                 {{ Auth::user()->name }} 👋
                             </h2>
 
-                            <p class="text-white-50 mb-0">
+                            <p class="text-white-50 mb-0 fs-6">
                                 Monitoring sistem inspeksi rumah sakit
-                                secara realtime dengan dashboard modern.
+                                secara realtime dengan dashboard modern
+                                dan analisa data inspeksi.
                             </p>
+
+                            <div class="mt-4 d-flex gap-3 flex-wrap">
+
+                                <div class="mini-badge">
+                                    <i data-feather="activity"></i>
+                                    Realtime Monitoring
+                                </div>
+
+                                <div class="mini-badge">
+                                    <i data-feather="shield"></i>
+                                    Sistem Aman
+                                </div>
+
+                            </div>
 
                         </div>
 
@@ -65,21 +84,27 @@
         <!-- KATEGORI -->
         <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 rounded-4 shadow dashboard-card card-purple text-white">
+            <div class="card dashboard-card card-purple">
 
                 <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="card-circle"></div>
+
+                    <div class="d-flex justify-content-between align-items-start position-relative">
 
                         <div>
 
-                            <p class="small opacity-75 mb-2">
-                                Kategori
+                            <p class="small text-white-50 mb-2">
+                                Total Kategori
                             </p>
 
-                            <h1 class="fw-bold mb-0">
+                            <h1 class="fw-bold text-white mb-1">
                                 {{ $totalKategori ?? 0 }}
                             </h1>
+
+                            <small class="text-white-50">
+                                Data kategori inspeksi
+                            </small>
 
                         </div>
 
@@ -98,21 +123,27 @@
         <!-- SUB URAIAN -->
         <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 rounded-4 shadow dashboard-card card-pink text-white">
+            <div class="card dashboard-card card-pink">
 
                 <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="card-circle"></div>
+
+                    <div class="d-flex justify-content-between align-items-start position-relative">
 
                         <div>
 
-                            <p class="small opacity-75 mb-2">
+                            <p class="small text-white-50 mb-2">
                                 Sub Uraian
                             </p>
 
-                            <h1 class="fw-bold mb-0">
+                            <h1 class="fw-bold text-white mb-1">
                                 {{ $totalSubUraian ?? 0 }}
                             </h1>
+
+                            <small class="text-white-50">
+                                Detail pemeriksaan
+                            </small>
 
                         </div>
 
@@ -131,21 +162,27 @@
         <!-- RUANGAN -->
         <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 rounded-4 shadow dashboard-card card-blue text-white">
+            <div class="card dashboard-card card-blue">
 
                 <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="card-circle"></div>
+
+                    <div class="d-flex justify-content-between align-items-start position-relative">
 
                         <div>
 
-                            <p class="small opacity-75 mb-2">
-                                Ruangan
+                            <p class="small text-white-50 mb-2">
+                                Total Ruangan
                             </p>
 
-                            <h1 class="fw-bold mb-0">
+                            <h1 class="fw-bold text-white mb-1">
                                 {{ $totalRuangan ?? 0 }}
                             </h1>
+
+                            <small class="text-white-50">
+                                Ruangan rumah sakit
+                            </small>
 
                         </div>
 
@@ -164,21 +201,27 @@
         <!-- INSPEKSI -->
         <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 rounded-4 shadow dashboard-card card-green text-white">
+            <div class="card dashboard-card card-green">
 
                 <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="card-circle"></div>
+
+                    <div class="d-flex justify-content-between align-items-start position-relative">
 
                         <div>
 
-                            <p class="small opacity-75 mb-2">
-                                Inspeksi
+                            <p class="small text-white-50 mb-2">
+                                Total Inspeksi
                             </p>
 
-                            <h1 class="fw-bold mb-0">
+                            <h1 class="fw-bold text-white mb-1">
                                 {{ $totalInspeksi ?? 0 }}
                             </h1>
+
+                            <small class="text-white-50">
+                                Pemeriksaan selesai
+                            </small>
 
                         </div>
 
@@ -199,10 +242,10 @@
     <!-- CHART -->
     <div class="row mt-4">
 
-        <!-- GRAFIK -->
-        <div class="col-xl-8">
+        <!-- BAR CHART -->
+        <div class="col-xl-7">
 
-            <div class="card border-0 rounded-4 shadow-lg h-100">
+            <div class="card border-0 rounded-4 shadow-lg chart-card h-100">
 
                 <div class="card-header bg-white border-0 p-4">
 
@@ -228,9 +271,11 @@
 
                 </div>
 
-                <div class="card-body">
+                <div class="card-body pt-0">
 
-                    <canvas id="inspeksiChart" height="110"></canvas>
+                    <div class="chart-wrapper">
+                        <canvas id="inspeksiChart"></canvas>
+                    </div>
 
                 </div>
 
@@ -238,36 +283,36 @@
 
         </div>
 
-        <!-- STATUS -->
-        <div class="col-xl-4">
+        <!-- DONUT -->
+        <div class="col-xl-5">
 
-            <div class="card border-0 rounded-4 shadow-lg h-100">
+            <div class="card border-0 rounded-4 shadow-lg chart-card h-100">
 
                 <div class="card-header bg-white border-0 p-4">
 
-                    <h5 class="fw-bold mb-1">
-                        Status Jawaban
-                    </h5>
+                    <div>
 
-                    <small class="text-muted">
-                        Persentase hasil inspeksi
-                    </small>
+                        <h5 class="fw-bold mb-1">
+                            Status Jawaban
+                        </h5>
 
-                </div>
-
-                <div class="card-body d-flex flex-column justify-content-center">
-
-                    <!-- DOUGHNUT -->
-                    <div class="text-center mb-4">
-
-                        <canvas id="statusChart" height="240"></canvas>
+                        <small class="text-muted">
+                            Persentase hasil inspeksi
+                        </small>
 
                     </div>
 
-                    <!-- LEGEND -->
-                    <div>
+                </div>
 
-                        <!-- BAIK -->
+                <div class="card-body pt-0">
+
+                    <div class="chart-donut-wrapper">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="mt-4">
+
                         <div class="status-item mb-3">
 
                             <div class="d-flex align-items-center gap-2">
@@ -286,7 +331,6 @@
 
                         </div>
 
-                        <!-- TIDAK BAIK -->
                         <div class="status-item">
 
                             <div class="d-flex align-items-center gap-2">
@@ -324,7 +368,7 @@
 
                 <div class="card-header bg-white border-0 p-4">
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
                         <div>
 
@@ -339,7 +383,7 @@
                         </div>
 
                         <a href="{{ route('inspeksi.index') }}"
-                           class="btn btn-primary rounded-pill px-4">
+                           class="btn btn-primary rounded-pill px-4 shadow-sm">
                             Lihat Semua
                         </a>
 
@@ -349,9 +393,9 @@
 
                 <div class="card-body table-responsive">
 
-                    <table class="table table-hover align-middle">
+                    <table class="table align-middle modern-table">
 
-                        <thead class="table-light">
+                        <thead>
 
                             <tr>
                                 <th>No</th>
@@ -412,7 +456,7 @@
                                 <td colspan="4" class="text-center py-5 text-muted">
 
                                     <i data-feather="database"
-                                       style="width:40px;height:40px;"></i>
+                                       style="width:45px;height:45px;"></i>
 
                                     <p class="mt-3 mb-0">
                                         Belum ada data inspeksi
@@ -441,25 +485,51 @@
 <style>
 
 body{
-    background:#f5f7fb;
+    background:#f4f7fe;
+}
+
+/* CARD */
+.card{
+    border:none!important;
 }
 
 /* WELCOME */
 .welcome-card{
     background:linear-gradient(135deg,#7c3aed,#6366f1);
+    position:relative;
+}
+
+.welcome-shape{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
+}
+
+.shape-1{
+    width:250px;
+    height:250px;
+    top:-80px;
+    right:-50px;
+}
+
+.shape-2{
+    width:180px;
+    height:180px;
+    bottom:-80px;
+    right:180px;
 }
 
 .welcome-icon{
     width:120px;
     height:120px;
-    border-radius:30px;
+    border-radius:35px;
     background:rgba(255,255,255,.15);
 
     display:flex;
     align-items:center;
     justify-content:center;
 
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(12px);
 }
 
 .welcome-icon svg{
@@ -468,19 +538,51 @@ body{
     color:white;
 }
 
-/* CARD */
+.mini-badge{
+    padding:10px 16px;
+    border-radius:14px;
+    background:rgba(255,255,255,.12);
+    color:white;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    backdrop-filter:blur(10px);
+
+    font-size:13px;
+}
+
+.mini-badge svg{
+    width:16px;
+    height:16px;
+}
+
+/* DASHBOARD CARD */
 .dashboard-card{
-    transition:.3s;
-    cursor:pointer;
+    border:none;
     overflow:hidden;
+    position:relative;
+
+    transition:.35s ease;
 }
 
 .dashboard-card:hover{
-    transform:translateY(-8px);
-    box-shadow:0 20px 40px rgba(0,0,0,.15)!important;
+    transform:translateY(-10px);
+    box-shadow:0 25px 50px rgba(0,0,0,.18)!important;
 }
 
-/* GRADIENT */
+.card-circle{
+    position:absolute;
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
+
+    top:-40px;
+    right:-30px;
+}
+
 .card-purple{
     background:linear-gradient(135deg,#8b5cf6,#6366f1);
 }
@@ -514,6 +616,20 @@ body{
 .dashboard-icon svg{
     width:35px;
     height:35px;
+    color:white;
+}
+
+/* CHART */
+.chart-wrapper{
+    position:relative;
+    height:280px;
+}
+
+.chart-donut-wrapper{
+    position:relative;
+    width:240px;
+    height:240px;
+    margin:auto;
 }
 
 /* STATUS */
@@ -522,8 +638,8 @@ body{
     align-items:center;
     justify-content:space-between;
 
-    padding:14px 16px;
-    border-radius:16px;
+    padding:15px 18px;
+    border-radius:18px;
 
     background:#f8fafc;
 }
@@ -535,17 +651,42 @@ body{
 }
 
 /* TABLE */
-.table tbody tr{
+.modern-table thead tr{
+    background:#f8fafc;
+}
+
+.modern-table th{
+    border:none;
+    padding:18px;
+    color:#64748b;
+}
+
+.modern-table td{
+    padding:18px;
+    border-top:1px solid #f1f5f9;
+}
+
+.modern-table tbody tr{
     transition:.2s;
 }
 
-.table tbody tr:hover{
+.modern-table tbody tr:hover{
     transform:scale(1.01);
+    background:#fafafa;
 }
 
-/* CARD */
-.card{
-    border:none!important;
+/* RESPONSIVE */
+@media(max-width:768px){
+
+    .welcome-icon{
+        display:none;
+    }
+
+    .chart-donut-wrapper{
+        width:210px;
+        height:210px;
+    }
+
 }
 
 </style>
@@ -576,9 +717,9 @@ new Chart(ctx, {
 
             data: {!! json_encode($chart->pluck('total')) !!},
 
-            borderRadius: 15,
+            borderRadius: 18,
             borderSkipped: false,
-            barThickness: 35,
+            barThickness: 32,
 
             backgroundColor: [
                 '#8b5cf6',
@@ -595,6 +736,7 @@ new Chart(ctx, {
     options: {
 
         responsive: true,
+        maintainAspectRatio:false,
 
         plugins: {
 
@@ -607,16 +749,21 @@ new Chart(ctx, {
         scales: {
 
             y: {
+
                 beginAtZero:true,
+
                 grid:{
                     color:'rgba(0,0,0,.05)'
                 }
+
             },
 
             x: {
+
                 grid:{
                     display:false
                 }
+
             }
 
         }
@@ -649,7 +796,7 @@ new Chart(statusCtx, {
             ],
 
             borderWidth:0,
-            hoverOffset:12
+            hoverOffset:10
 
         }]
     },
@@ -657,6 +804,7 @@ new Chart(statusCtx, {
     options: {
 
         responsive:true,
+        maintainAspectRatio:false,
 
         cutout:'72%',
 
