@@ -1,337 +1,264 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-    <title>Hasil Inspeksi</title>
+    <title>FORM HASIL INSPEKSI</title>
 
     <style>
-
         body{
-            font-family: sans-serif;
-            font-size: 13px;
-            color: #111827;
-            margin: 25px;
-        }
-
-        h2{
-            margin-bottom: 5px;
-            color: #111827;
-        }
-
-        .subtitle{
-            margin-top: 0;
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        .info{
-            margin-top: 20px;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-        }
-
-        .info p{
-            margin: 6px 0;
+            font-family: DejaVu Sans, "Times New Roman", serif;
+            font-size:10px;
+            margin:10px;
+            color:#000;
         }
 
         table{
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            width:100%;
+            border-collapse:collapse;
         }
 
-        table th,
-        table td{
-            border: 1px solid #d1d5db;
-            padding: 10px;
-            vertical-align: middle;
+        th, td{
+            border:1px solid #000;
+            padding:3px 5px;
+            vertical-align:top;
         }
 
-        table th{
-            background: #f3f4f6;
-            font-weight: bold;
-            text-align: center;
+        th{
+            text-align:center;
+            font-weight:bold;
         }
+
+        .center{ text-align:center; }
 
         .kategori{
-            background: #e5e7eb;
-            font-weight: bold;
-            color: #111827;
+            font-weight:bold;
+            background:#d9d9d9;
         }
 
-        .badge-baik{
-            background: #dcfce7;
-            color: #166534;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            display: inline-block;
+        .uraian{ font-weight:bold; }
+
+        .sub{ padding-left:15px; }
+
+        .ruang-header{
+            font-size:9px;
+            line-height:1.2;
         }
 
-        .badge-tidak{
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            display: inline-block;
+        .check{
+            font-size:12px;
+            font-weight:bold;
         }
 
         .catatan{
-            margin-top: 30px;
+            font-size:9px;
+            line-height:1.4;
         }
 
-        .catatan h4{
-            margin-bottom: 10px;
-            color: #111827;
+        .header-box{
+            margin-bottom:10px;
         }
 
-        .catatan-box{
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
-            border-radius: 8px;
-            padding: 15px;
-            line-height: 1.7;
-            min-height: 60px;
+        .header-box table td{
+            border:none;
+            padding:2px;
         }
 
-        .ttd{
-            margin-top: 50px;
-            width: 100%;
+        .title{
+            font-size:14px;
+            font-weight:bold;
+            text-align:center;
+            margin-bottom:10px;
         }
-
-        .ttd td{
-            border: none;
-            text-align: center;
-            vertical-align: top;
-        }
-
-        img{
-            width: 120px;
-            height: auto;
-            margin-top: 10px;
-        }
-
-        .footer{
-            margin-top: 40px;
-            text-align: right;
-            color: #9ca3af;
-            font-size: 11px;
-        }
-
     </style>
-
 </head>
 
 <body>
 
-    <h2>HASIL INSPEKSI</h2>
+@php
+    $jawaban = is_array($inspeksi->jawaban)
+        ? $inspeksi->jawaban
+        : json_decode($inspeksi->jawaban ?? '[]', true);
 
-    <p class="subtitle">
-        Laporan hasil pemeriksaan inspeksi ruangan
-    </p>
+    $catatanKategori = is_array($inspeksi->catatan_kategori ?? null)
+        ? $inspeksi->catatan_kategori
+        : json_decode($inspeksi->catatan_kategori ?? '[]', true);
 
-    {{-- INFO --}}
-    <div class="info">
+    $groupedKategori = $subUraian->groupBy(
+        fn($item) => $item->uraian->kategori->nama_kategori ?? 'Kategori'
+    );
 
-        <p>
-            <strong>Tanggal:</strong>
-            {{ \Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y') }}
-        </p>
+    $alphabet = range('A','Z');
+    $noUraian = 1;
+@endphp
 
-        <p>
-            <strong>Ruangan:</strong>
-            {{ $inspeksi->ruangan->nama_ruangan ?? '-' }}
-        </p>
 
-        <p>
-            <strong>Petugas K3RS:</strong>
-            {{ $inspeksi->nama_petugas_k3rs ?? '-' }}
-        </p>
+<div class="title">
+    FORM HASIL INSPEKSI
+</div>
 
-        <p>
-            <strong>Hasil:</strong>
-            {{ $inspeksi->hasil }}%
-        </p>
-
-    </div>
-
-    @php
-
-        $filtered = $subUraian->filter(function ($item) use ($jawaban) {
-            return isset($jawaban[$item->id]);
-        });
-
-        $grouped = $filtered->groupBy(function ($item) {
-            return $item->uraian->nama_uraian ?? 'Lainnya';
-        });
-
-        $no = 1;
-
-    @endphp
-
-    {{-- TABLE --}}
+<div class="header-box">
     <table>
+        <tr>
+            <td width="15%"><strong>Tanggal</strong></td>
+            <td width="35%">: {{ \Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y') }}</td>
 
-        <thead>
+            <td width="15%"><strong>Ruangan</strong></td>
+            <td width="35%">: {{ $inspeksi->ruangan->nama_ruangan ?? '-' }}</td>
+        </tr>
+
+        <tr>
+            <td><strong>Petugas K3RS</strong></td>
+            <td>: {{ $inspeksi->nama_petugas_k3rs ?? '-' }}</td>
+
+            <td><strong>Petugas Ruangan</strong></td>
+            <td>: {{ $inspeksi->nama_petugas_ruangan ?? '-' }}</td>
+        </tr>
+    </table>
+</div>
+
+
+<table>
+    <thead>
+        <tr>
+            <th rowspan="2" width="4%">No</th>
+            <th rowspan="2">Uraian Inspeksi / Obyek Penilaian</th>
+
+            <th colspan="2" class="ruang-header">
+                Ruang:<br>
+                {{ $inspeksi->ruangan->nama_ruangan ?? '-' }}
+            </th>
+
+            <th rowspan="2" width="20%">
+                Keterangan
+            </th>
+        </tr>
+
+        <tr>
+            <th width="6%">Ya</th>
+            <th width="6%">Tidak</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    @foreach($groupedKategori as $namaKategori => $items)
+
+        <tr>
+            <td class="center kategori">
+                {{ $alphabet[$loop->index] }}.
+            </td>
+
+            <td colspan="4" class="kategori">
+                {{ strtoupper($namaKategori) }}
+            </td>
+        </tr>
+
+        @php
+            $groupedUraian = $items->groupBy(
+                fn($x) => $x->uraian->nama_uraian ?? '-'
+            );
+        @endphp
+
+
+        @foreach($groupedUraian as $namaUraian => $subItems)
 
             <tr>
+                <td class="center">
+                    {{ $noUraian++ }}
+                </td>
 
-                <th width="5%">
-                    No
-                </th>
+                <td class="uraian">
+                    {{ $namaUraian }}
+                </td>
 
-                <th>
-                    Pertanyaan
-                </th>
-
-                <th width="25%">
-                    Jawaban
-                </th>
-
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
 
-        </thead>
 
-        <tbody>
+            @foreach($subItems as $index => $sub)
 
-            @foreach($grouped as $uraian => $items)
+                @php
+                    $nilai = strtolower(trim($jawaban[$sub->id] ?? ''));
+
+                    $baik = in_array($nilai, ['baik','ya']);
+                    $tidak = in_array($nilai, ['tidak','tidak baik']);
+
+                    $huruf = chr(97 + $index);
+
+                    $kategoriId = optional(
+                        optional($sub->uraian)->kategori
+                    )->id;
+
+                    $catatan =
+                        $catatanKategori[$kategoriId]
+                        ?? $inspeksi->keterangan
+                        ?? '-';
+                @endphp
 
                 <tr>
+                    <td></td>
 
-                    <td colspan="3" class="kategori">
-                        {{ $uraian }}
+                    <td class="sub">
+                        {{ $huruf }}.
+                        {{ $sub->nama_sub_uraian }}
                     </td>
 
+                    <td class="center check">
+                        {{ $baik ? '✓' : '' }}
+                    </td>
+
+                    <td class="center check">
+                        {{ $tidak ? '✓' : '' }}
+                    </td>
+
+                    <td class="catatan">
+                        {{ $index == 0 ? $catatan : '' }}
+                    </td>
                 </tr>
-
-                @foreach($items as $item)
-
-                    @php
-
-                        $value = strtolower(trim($jawaban[$item->id] ?? ''));
-
-                        $isTidakBaik =
-                            $value == 'tidak baik' ||
-                            $value == 'tidak_baik' ||
-                            $value == 'tidak';
-
-                    @endphp
-
-                    <tr>
-
-                        <td align="center">
-                            {{ $no++ }}
-                        </td>
-
-                        <td>
-                            {{ $item->nama_sub_uraian }}
-                        </td>
-
-                        <td align="center">
-
-                            @if($isTidakBaik)
-
-                                <span class="badge-tidak">
-                                    Tidak Baik
-                                </span>
-
-                            @else
-
-                                <span class="badge-baik">
-                                    Baik
-                                </span>
-
-                            @endif
-
-                        </td>
-
-                    </tr>
-
-                @endforeach
 
             @endforeach
 
-        </tbody>
+        @endforeach
+    @endforeach
 
-    </table>
+    </tbody>
+</table>
 
-    {{-- CATATAN --}}
-    <div class="catatan">
 
-        <h4>
-            Catatan Inspeksi
-        </h4>
+<br><br>
 
-        <div class="catatan-box">
+<table style="border:none; margin-top:20px;">
+    <tr>
+        <td style="border:none; text-align:center; width:50%;">
+            Petugas K3RS
+            <br><br>
 
-            {{ $inspeksi->keterangan ?? 'Tidak ada catatan inspeksi.' }}
+            @if(!empty($inspeksi->ttd_k3rs))
+                <img src="{{ $inspeksi->ttd_k3rs }}" width="100">
+            @else
+                <br><br><br>
+            @endif
 
-        </div>
+            <br>
+            <strong>{{ $inspeksi->nama_petugas_k3rs ?? '-' }}</strong>
+        </td>
 
-    </div>
+        <td style="border:none; text-align:center; width:50%;">
+            Petugas Ruangan
+            <br><br>
 
-    {{-- TTD --}}
-    <table class="ttd">
+            @if(!empty($inspeksi->ttd_ruangan))
+                <img src="{{ $inspeksi->ttd_ruangan }}" width="100">
+            @else
+                <br><br><br>
+            @endif
 
-        <tr>
-
-            {{-- PETUGAS K3RS --}}
-            <td>
-
-                <p>
-                    <strong>Petugas K3RS</strong>
-                </p>
-
-                @if(!empty($inspeksi->ttd_k3rs))
-
-                    <img src="{{ $inspeksi->ttd_k3rs }}">
-
-                @else
-
-                    <p>-</p>
-
-                @endif
-
-                <p>
-                    {{ $inspeksi->nama_petugas_k3rs ?? '-' }}
-                </p>
-
-            </td>
-
-            {{-- PETUGAS RUANGAN --}}
-            <td>
-
-                <p>
-                    <strong>Petugas Ruangan</strong>
-                </p>
-
-                @if(!empty($inspeksi->ttd_ruangan))
-
-                    <img src="{{ $inspeksi->ttd_ruangan }}">
-
-                @else
-
-                    <p>-</p>
-
-                @endif
-
-                <p>
-                    {{ $inspeksi->nama_petugas_ruangan ?? '-' }}
-                </p>
-
-            </td>
-
-        </tr>
-
-    </table>
-
-    <div class="footer">
-        Dicetak otomatis oleh sistem inspeksi
-    </div>
+            <br>
+            <strong>{{ $inspeksi->nama_petugas_ruangan ?? '-' }}</strong>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

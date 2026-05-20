@@ -24,7 +24,7 @@ class InspeksiController extends Controller
             ->latest()
             ->get();
 
-        $ruangan   = Ruangan::all();
+        $ruangan = Ruangan::all();
 
         $kategoris = Kategori::with([
             'subUraians.uraian'
@@ -93,9 +93,16 @@ class InspeksiController extends Controller
                 $total
             ] = $this->prosesJawaban($request);
 
+            /*
+            |--------------------------------------------------------------------------
+            | CATATAN PER KATEGORI
+            |--------------------------------------------------------------------------
+            */
+            $catatanKategori = $request->catatan_kategori ?? [];
+
             Inspeksi::create([
 
-                // DATA UTAMA
+                // DATA
                 ...$data,
 
                 // PETUGAS
@@ -106,8 +113,11 @@ class InspeksiController extends Controller
                 'ttd_k3rs'    => $request->ttd_k3rs,
                 'ttd_ruangan' => $request->ttd_ruangan,
 
-                // KETERANGAN
+                // KETERANGAN UMUM
                 'keterangan' => $request->keterangan,
+
+                // CATATAN PER KATEGORI
+                'catatan_kategori' => $catatanKategori,
 
                 // JAWABAN
                 'jawaban' => $jawaban,
@@ -128,6 +138,7 @@ class InspeksiController extends Controller
             return redirect()
                 ->route('inspeksi.riwayat')
                 ->with('success', 'Inspeksi berhasil disimpan');
+
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -155,13 +166,15 @@ class InspeksiController extends Controller
         $inspeksi = Inspeksi::with('ruangan')
             ->findOrFail($id);
 
-        $subUraian = SubUraian::with('uraian')
-            ->get();
+        $subUraian = SubUraian::with([
+            'uraian.kategori'
+        ])->get();
 
         return view('inspeksi.hasil', [
-            'inspeksi'  => $inspeksi,
-            'jawaban'   => $inspeksi->jawaban ?? [],
-            'subUraian' => $subUraian,
+            'inspeksi'         => $inspeksi,
+            'jawaban'          => $inspeksi->jawaban ?? [],
+            'subUraian'        => $subUraian,
+            'catatanKategori'  => $inspeksi->catatan_kategori ?? [],
         ]);
     }
 
@@ -174,15 +187,21 @@ class InspeksiController extends Controller
     {
         $inspeksi = Inspeksi::findOrFail($id);
 
-        $subUraian = SubUraian::with('uraian')
-            ->get();
+        $subUraian = SubUraian::with([
+            'uraian.kategori'
+        ])->get();
 
         $ruangan = Ruangan::all();
+
+        $kategoris = Kategori::with([
+            'subUraians.uraian'
+        ])->get();
 
         return view('inspeksi.edit', compact(
             'inspeksi',
             'subUraian',
-            'ruangan'
+            'ruangan',
+            'kategoris'
         ));
     }
 
@@ -211,6 +230,13 @@ class InspeksiController extends Controller
                 $total
             ] = $this->prosesJawaban($request);
 
+            /*
+            |--------------------------------------------------------------------------
+            | CATATAN PER KATEGORI
+            |--------------------------------------------------------------------------
+            */
+            $catatanKategori = $request->catatan_kategori ?? [];
+
             $inspeksi->update([
 
                 // DATA
@@ -226,6 +252,9 @@ class InspeksiController extends Controller
 
                 // KETERANGAN
                 'keterangan' => $request->keterangan,
+
+                // CATATAN PER KATEGORI
+                'catatan_kategori' => $catatanKategori,
 
                 // JAWABAN
                 'jawaban' => $jawaban,
@@ -246,6 +275,7 @@ class InspeksiController extends Controller
             return redirect()
                 ->route('inspeksi.riwayat')
                 ->with('success', 'Data inspeksi berhasil diupdate');
+
         } catch (\Throwable $e) {
 
             DB::rollBack();
@@ -280,6 +310,7 @@ class InspeksiController extends Controller
                 'success',
                 'Data inspeksi berhasil dihapus'
             );
+
         } catch (\Throwable $e) {
 
             Log::error('DELETE INSPEKSI ERROR', [
@@ -303,13 +334,15 @@ class InspeksiController extends Controller
         $inspeksi = Inspeksi::with('ruangan')
             ->findOrFail($id);
 
-        $subUraian = SubUraian::with('uraian')
-            ->get();
+        $subUraian = SubUraian::with([
+            'uraian.kategori'
+        ])->get();
 
         $pdf = Pdf::loadView('inspeksi.pdf', [
-            'inspeksi'  => $inspeksi,
-            'jawaban'   => $inspeksi->jawaban ?? [],
-            'subUraian' => $subUraian,
+            'inspeksi'        => $inspeksi,
+            'jawaban'         => $inspeksi->jawaban ?? [],
+            'subUraian'       => $subUraian,
+            'catatanKategori' => $inspeksi->catatan_kategori ?? [],
         ]);
 
         return $pdf->download('laporan-inspeksi.pdf');
@@ -344,36 +377,16 @@ class InspeksiController extends Controller
     */
     private function prosesJawaban(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | AMBIL SEMUA ID SUB URAIAN
-        |--------------------------------------------------------------------------
-        */
         $subUraianIds = SubUraian::pluck('id')->toArray();
 
-        /*
-        |--------------------------------------------------------------------------
-        | INPUT JAWABAN DARI FORM
-        |--------------------------------------------------------------------------
-        */
         $input = $request->input('jawaban', []);
 
         $jawaban = [];
 
-        /*
-        |--------------------------------------------------------------------------
-        | NORMALISASI JAWABAN
-        |--------------------------------------------------------------------------
-        */
         foreach ($subUraianIds as $id) {
 
             $value = $input[$id] ?? 'Tidak';
 
-            /*
-            |--------------------------------------------------------------------------
-            | NORMALISASI VALUE
-            |--------------------------------------------------------------------------
-            */
             $value = strtolower(trim($value));
 
             if (
@@ -382,51 +395,29 @@ class InspeksiController extends Controller
                 $value === 'yes' ||
                 $value === '1'
             ) {
+
                 $jawaban[$id] = 'Baik';
+
             } else {
+
                 $jawaban[$id] = 'Tidak';
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | TOTAL SOAL
-        |--------------------------------------------------------------------------
-        */
         $total = count($jawaban);
 
-        /*
-        |--------------------------------------------------------------------------
-        | HITUNG BAIK
-        |--------------------------------------------------------------------------
-        */
         $baik = collect($jawaban)
             ->filter(function ($item) {
                 return $item === 'Baik';
             })
             ->count();
 
-        /*
-        |--------------------------------------------------------------------------
-        | HITUNG BURUK
-        |--------------------------------------------------------------------------
-        */
         $buruk = $total - $baik;
 
-        /*
-        |--------------------------------------------------------------------------
-        | PERSENTASE
-        |--------------------------------------------------------------------------
-        */
         $hasil = $total > 0
             ? round(($baik / $total) * 100)
             : 0;
 
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS
-        |--------------------------------------------------------------------------
-        */
         if ($hasil >= 85) {
 
             $status = 'Sangat Baik';
@@ -448,11 +439,6 @@ class InspeksiController extends Controller
             $badge  = 'danger';
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | RETURN
-        |--------------------------------------------------------------------------
-        */
         return [
             $jawaban,
             $hasil,
