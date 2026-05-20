@@ -134,32 +134,35 @@
         Laporan hasil pemeriksaan inspeksi ruangan
     </p>
 
-    {{-- INFO --}}
+    
     <div class="info">
 
         <p>
             <strong>Tanggal:</strong>
-            {{ \Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y') }}
+            <?php echo e(\Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y')); ?>
+
         </p>
 
         <p>
             <strong>Ruangan:</strong>
-            {{ $inspeksi->ruangan->nama_ruangan ?? '-' }}
+            <?php echo e($inspeksi->ruangan->nama_ruangan ?? '-'); ?>
+
         </p>
 
         <p>
             <strong>Petugas K3RS:</strong>
-            {{ $inspeksi->nama_petugas_k3rs ?? '-' }}
+            <?php echo e($inspeksi->nama_petugas_k3rs ?? '-'); ?>
+
         </p>
 
         <p>
             <strong>Hasil:</strong>
-            {{ $inspeksi->hasil }}%
+            <?php echo e($inspeksi->hasil); ?>%
         </p>
 
     </div>
 
-    @php
+    <?php
 
         $filtered = $subUraian->filter(function ($item) use ($jawaban) {
             return isset($jawaban[$item->id]);
@@ -171,9 +174,9 @@
 
         $no = 1;
 
-    @endphp
+    ?>
 
-    {{-- TABLE --}}
+    
     <table>
 
         <thead>
@@ -198,19 +201,20 @@
 
         <tbody>
 
-            @foreach($grouped as $uraian => $items)
+            <?php $__currentLoopData = $grouped; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $uraian => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                 <tr>
 
                     <td colspan="3" class="kategori">
-                        {{ $uraian }}
+                        <?php echo e($uraian); ?>
+
                     </td>
 
                 </tr>
 
-                @foreach($items as $item)
+                <?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                    @php
+                    <?php
 
                         $value = strtolower(trim($jawaban[$item->id] ?? ''));
 
@@ -219,47 +223,49 @@
                             $value == 'tidak_baik' ||
                             $value == 'tidak';
 
-                    @endphp
+                    ?>
 
                     <tr>
 
                         <td align="center">
-                            {{ $no++ }}
+                            <?php echo e($no++); ?>
+
                         </td>
 
                         <td>
-                            {{ $item->nama_sub_uraian }}
+                            <?php echo e($item->nama_sub_uraian); ?>
+
                         </td>
 
                         <td align="center">
 
-                            @if($isTidakBaik)
+                            <?php if($isTidakBaik): ?>
 
                                 <span class="badge-tidak">
                                     Tidak Baik
                                 </span>
 
-                            @else
+                            <?php else: ?>
 
                                 <span class="badge-baik">
                                     Baik
                                 </span>
 
-                            @endif
+                            <?php endif; ?>
 
                         </td>
 
                     </tr>
 
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
         </tbody>
 
     </table>
 
-    {{-- CATATAN --}}
+    
     <div class="catatan">
 
         <h4>
@@ -268,59 +274,62 @@
 
         <div class="catatan-box">
 
-            {{ $inspeksi->keterangan ?? 'Tidak ada catatan inspeksi.' }}
+            <?php echo e($inspeksi->keterangan ?? 'Tidak ada catatan inspeksi.'); ?>
+
 
         </div>
 
     </div>
 
-    {{-- TTD --}}
+    
     <table class="ttd">
 
         <tr>
 
-            {{-- PETUGAS K3RS --}}
+            
             <td>
 
                 <p>
                     <strong>Petugas K3RS</strong>
                 </p>
 
-                @if(!empty($inspeksi->ttd_k3rs))
+                <?php if(!empty($inspeksi->ttd_k3rs)): ?>
 
-                    <img src="{{ $inspeksi->ttd_k3rs }}">
+                    <img src="<?php echo e($inspeksi->ttd_k3rs); ?>">
 
-                @else
+                <?php else: ?>
 
                     <p>-</p>
 
-                @endif
+                <?php endif; ?>
 
                 <p>
-                    {{ $inspeksi->nama_petugas_k3rs ?? '-' }}
+                    <?php echo e($inspeksi->nama_petugas_k3rs ?? '-'); ?>
+
                 </p>
 
             </td>
 
-            {{-- PETUGAS RUANGAN --}}
+            
             <td>
 
                 <p>
                     <strong>Petugas Ruangan</strong>
                 </p>
 
-                @if(!empty($inspeksi->ttd_ruangan))
+                <?php if(!empty($inspeksi->ttd_ruangan)): ?>
 
-                    <img src="{{ $inspeksi->ttd_ruangan }}">
+                    <img src="<?php echo e($inspeksi->ttd_ruangan); ?>">
 
-                @else
+                <?php else: ?>
 
                     <p>-</p>
 
-                @endif
+                <?php endif; ?>
 
                 <p>
-                    {{ $inspeksi->nama_petugas_ruangan ?? '-' }}
+                    <?php echo e($inspeksi->nama_petugas_ruangan ?? '-'); ?>
+
                 </p>
 
             </td>
@@ -334,4 +343,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/inspeksi/pdf.blade.php ENDPATH**/ ?>

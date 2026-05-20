@@ -6,38 +6,68 @@ use App\Models\Inspeksi;
 use App\Models\Kategori;
 use App\Models\Ruangan;
 use App\Models\SubUraian;
-use App\Models\Uraian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InspeksiController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
     public function index()
     {
-        return view('inspeksi.index', [
-            'kategori'  => Kategori::all(),
-            'uraian'    => Uraian::all(),
-            'subUraian' => SubUraian::with('uraian')->get(),
-            'ruangan'   => Ruangan::all(),
-            'inspeksis' => Inspeksi::with(['ruangan', 'kategori'])
-                ->latest()
-                ->get(),
-        ]);
+        $inspeksis = Inspeksi::with('ruangan')
+            ->latest()
+            ->get();
+
+        $ruangan   = Ruangan::all();
+
+        $kategoris = Kategori::with([
+            'subUraians.uraian'
+        ])->get();
+
+        return view('inspeksi.index', compact(
+            'inspeksis',
+            'ruangan',
+            'kategoris'
+        ));
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RIWAYAT
+    |--------------------------------------------------------------------------
+    */
     public function riwayat()
     {
-        return view('inspeksi.riwayat', [
-            'inspeksis' => Inspeksi::with(['ruangan', 'kategori'])
-                ->latest()
-                ->get()
-        ]);
+        $inspeksis = Inspeksi::with('ruangan')
+            ->latest()
+            ->get();
+
+        return view('inspeksi.riwayat', compact('inspeksis'));
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE
+    |--------------------------------------------------------------------------
+    */
     public function create()
     {
-        return $this->index();
+        $ruangan = Ruangan::all();
+
+        $kategoris = Kategori::with([
+            'subUraians.uraian'
+        ])->get();
+
+        return view('inspeksi.create', compact(
+            'ruangan',
+            'kategoris'
+        ));
     }
 
     /*
@@ -45,119 +75,52 @@ class InspeksiController extends Controller
     | STORE
     |--------------------------------------------------------------------------
     */
-
     public function store(Request $request)
     {
         DB::beginTransaction();
 
         try {
 
-            $validated = $request->validate([
-                'tanggal'      => 'required|date',
-                'ruangan_id'   => 'required|exists:ruangans,id',
-                'kategori_id'  => 'required|exists:kategoris,id',
-                'jawaban'      => 'nullable|array',
-            ]);
+            $data = $this->validateData($request);
 
-            /*
-            |--------------------------------------------------------------------------
-            | AMBIL SUB URAIAN SESUAI KATEGORI
-            |--------------------------------------------------------------------------
-            */
-
-            $subUraianKategori = SubUraian::whereHas('uraian', function ($q) use ($validated) {
-
-                $q->where('kategori_id', $validated['kategori_id']);
-
-            })->pluck('id')->toArray();
-
-            $jawabanInput = $request->input('jawaban', []);
-
-            $jawaban = [];
-
-            /*
-            |--------------------------------------------------------------------------
-            | JIKA TIDAK DIISI -> OTOMATIS BAIK
-            |--------------------------------------------------------------------------
-            */
-
-            foreach ($subUraianKategori as $id) {
-
-                $jawaban[$id] = $jawabanInput[$id] ?? 'Baik';
-
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | HITUNG HASIL
-            |--------------------------------------------------------------------------
-            */
-
-            $total = count($jawaban);
-
-            $baik = 0;
-
-            foreach ($jawaban as $value) {
-
-                if ($value === 'Baik') {
-
-                    $baik++;
-
-                }
-
-            }
-
-            $hasil = $total > 0
-                ? round(($baik / $total) * 100)
-                : 0;
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS HASIL
-            |--------------------------------------------------------------------------
-            */
-
-            if ($hasil >= 85) {
-
-                $status = 'Sangat Baik';
-                $badge  = 'success';
-
-            } elseif ($hasil >= 70) {
-
-                $status = 'Baik';
-                $badge  = 'primary';
-
-            } elseif ($hasil >= 50) {
-
-                $status = 'Cukup';
-                $badge  = 'warning';
-
-            } else {
-
-                $status = 'Buruk';
-                $badge  = 'danger';
-
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | SIMPAN
-            |--------------------------------------------------------------------------
-            */
+            [
+                $jawaban,
+                $hasil,
+                $status,
+                $badge,
+                $baik,
+                $buruk,
+                $total
+            ] = $this->prosesJawaban($request);
 
             Inspeksi::create([
-                'tanggal'              => $validated['tanggal'],
-                'ruangan_id'           => $validated['ruangan_id'],
-                'kategori_id'          => $validated['kategori_id'],
-                'keterangan'           => $request->keterangan,
+
+                // DATA UTAMA
+                ...$data,
+
+                // PETUGAS
                 'nama_petugas_k3rs'    => $request->nama_petugas_k3rs,
                 'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
-                'ttd_k3rs'             => $request->ttd_k3rs,
-                'ttd_ruangan'          => $request->ttd_ruangan,
-                'jawaban'              => $jawaban,
-                'hasil'                => $hasil,
-                'status'               => $status,
-                'badge'                => $badge,
+
+                // TTD
+                'ttd_k3rs'    => $request->ttd_k3rs,
+                'ttd_ruangan' => $request->ttd_ruangan,
+
+                // KETERANGAN
+                'keterangan' => $request->keterangan,
+
+                // JAWABAN
+                'jawaban' => $jawaban,
+
+                // HASIL
+                'hasil'  => $hasil,
+                'status' => $status,
+                'badge'  => $badge,
+
+                // STATISTIK
+                'jumlah_baik'  => $baik,
+                'jumlah_buruk' => $buruk,
+                'total_soal'   => $total,
             ]);
 
             DB::commit();
@@ -165,162 +128,19 @@ class InspeksiController extends Controller
             return redirect()
                 ->route('inspeksi.riwayat')
                 ->with('success', 'Inspeksi berhasil disimpan');
-
         } catch (\Throwable $e) {
 
             DB::rollBack();
 
             Log::error('STORE INSPEKSI ERROR', [
-                'msg' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'line'    => $e->getLine(),
             ]);
 
             return back()
                 ->withInput()
                 ->withErrors([
-                    'error' => 'Gagal simpan: ' . $e->getMessage()
-                ]);
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE
-    |--------------------------------------------------------------------------
-    */
-
-    public function update(Request $request, $id)
-    {
-        DB::beginTransaction();
-
-        try {
-
-            $validated = $request->validate([
-                'tanggal'      => 'required|date',
-                'ruangan_id'   => 'required|exists:ruangans,id',
-                'kategori_id'  => 'required|exists:kategoris,id',
-            ]);
-
-            $inspeksi = Inspeksi::findOrFail($id);
-
-            /*
-            |--------------------------------------------------------------------------
-            | AMBIL SUB URAIAN SESUAI KATEGORI
-            |--------------------------------------------------------------------------
-            */
-
-            $subUraianKategori = SubUraian::whereHas('uraian', function ($q) use ($validated) {
-
-                $q->where('kategori_id', $validated['kategori_id']);
-
-            })->pluck('id')->toArray();
-
-            $jawabanInput = $request->input('jawaban', []);
-
-            $jawaban = [];
-
-            /*
-            |--------------------------------------------------------------------------
-            | JIKA TIDAK DIISI -> OTOMATIS BAIK
-            |--------------------------------------------------------------------------
-            */
-
-            foreach ($subUraianKategori as $idSub) {
-
-                $jawaban[$idSub] = $jawabanInput[$idSub] ?? 'Baik';
-
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | HITUNG HASIL
-            |--------------------------------------------------------------------------
-            */
-
-            $total = count($jawaban);
-
-            $baik = 0;
-
-            foreach ($jawaban as $value) {
-
-                if ($value === 'Baik') {
-
-                    $baik++;
-
-                }
-
-            }
-
-            $hasil = $total > 0
-                ? round(($baik / $total) * 100)
-                : 0;
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS HASIL
-            |--------------------------------------------------------------------------
-            */
-
-            if ($hasil >= 85) {
-
-                $status = 'Sangat Baik';
-                $badge  = 'success';
-
-            } elseif ($hasil >= 70) {
-
-                $status = 'Baik';
-                $badge  = 'primary';
-
-            } elseif ($hasil >= 50) {
-
-                $status = 'Cukup';
-                $badge  = 'warning';
-
-            } else {
-
-                $status = 'Buruk';
-                $badge  = 'danger';
-
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE
-            |--------------------------------------------------------------------------
-            */
-
-            $inspeksi->update([
-                'tanggal'              => $validated['tanggal'],
-                'ruangan_id'           => $validated['ruangan_id'],
-                'kategori_id'          => $validated['kategori_id'],
-                'keterangan'           => $request->keterangan,
-                'nama_petugas_k3rs'    => $request->nama_petugas_k3rs,
-                'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
-                'ttd_k3rs'             => $request->ttd_k3rs,
-                'ttd_ruangan'          => $request->ttd_ruangan,
-                'jawaban'              => $jawaban,
-                'hasil'                => $hasil,
-                'status'               => $status,
-                'badge'                => $badge,
-            ]);
-
-            DB::commit();
-
-            return redirect()
-                ->route('inspeksi.riwayat')
-                ->with('success', 'Data berhasil diupdate');
-
-        } catch (\Throwable $e) {
-
-            DB::rollBack();
-
-            Log::error('UPDATE INSPEKSI ERROR', [
-                'msg' => $e->getMessage()
-            ]);
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'error' => 'Gagal update: ' . $e->getMessage()
+                    'error' => 'Gagal simpan data : ' . $e->getMessage()
                 ]);
         }
     }
@@ -330,24 +150,12 @@ class InspeksiController extends Controller
     | SHOW
     |--------------------------------------------------------------------------
     */
-
     public function show($id)
     {
-        $inspeksi = Inspeksi::with(['ruangan', 'kategori'])
+        $inspeksi = Inspeksi::with('ruangan')
             ->findOrFail($id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | HANYA TAMPILKAN SUB URAIAN SESUAI KATEGORI
-        |--------------------------------------------------------------------------
-        */
-
         $subUraian = SubUraian::with('uraian')
-            ->whereHas('uraian', function ($q) use ($inspeksi) {
-
-                $q->where('kategori_id', $inspeksi->kategori_id);
-
-            })
             ->get();
 
         return view('inspeksi.hasil', [
@@ -362,32 +170,97 @@ class InspeksiController extends Controller
     | EDIT
     |--------------------------------------------------------------------------
     */
-
     public function edit($id)
     {
         $inspeksi = Inspeksi::findOrFail($id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER SUB URAIAN SESUAI KATEGORI
-        |--------------------------------------------------------------------------
-        */
-
         $subUraian = SubUraian::with('uraian')
-            ->whereHas('uraian', function ($q) use ($inspeksi) {
-
-                $q->where('kategori_id', $inspeksi->kategori_id);
-
-            })
             ->get();
 
-        return view('inspeksi.edit', [
-            'inspeksi'  => $inspeksi,
-            'kategori'  => Kategori::all(),
-            'uraian'    => Uraian::all(),
-            'subUraian' => $subUraian,
-            'ruangan'   => Ruangan::all(),
-        ]);
+        $ruangan = Ruangan::all();
+
+        return view('inspeksi.edit', compact(
+            'inspeksi',
+            'subUraian',
+            'ruangan'
+        ));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $data = $this->validateData($request);
+
+            $inspeksi = Inspeksi::findOrFail($id);
+
+            [
+                $jawaban,
+                $hasil,
+                $status,
+                $badge,
+                $baik,
+                $buruk,
+                $total
+            ] = $this->prosesJawaban($request);
+
+            $inspeksi->update([
+
+                // DATA
+                ...$data,
+
+                // PETUGAS
+                'nama_petugas_k3rs'    => $request->nama_petugas_k3rs,
+                'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
+
+                // TTD
+                'ttd_k3rs'    => $request->ttd_k3rs,
+                'ttd_ruangan' => $request->ttd_ruangan,
+
+                // KETERANGAN
+                'keterangan' => $request->keterangan,
+
+                // JAWABAN
+                'jawaban' => $jawaban,
+
+                // HASIL
+                'hasil'  => $hasil,
+                'status' => $status,
+                'badge'  => $badge,
+
+                // STATISTIK
+                'jumlah_baik'  => $baik,
+                'jumlah_buruk' => $buruk,
+                'total_soal'   => $total,
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('inspeksi.riwayat')
+                ->with('success', 'Data inspeksi berhasil diupdate');
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            Log::error('UPDATE INSPEKSI ERROR', [
+                'message' => $e->getMessage(),
+                'line'    => $e->getLine(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'error' => 'Gagal update data : ' . $e->getMessage()
+                ]);
+        }
     }
 
     /*
@@ -395,24 +268,199 @@ class InspeksiController extends Controller
     | DELETE
     |--------------------------------------------------------------------------
     */
-
     public function destroy($id)
     {
         try {
 
-            Inspeksi::findOrFail($id)->delete();
+            $inspeksi = Inspeksi::findOrFail($id);
 
-            return back()->with('success', 'Data berhasil dihapus');
+            $inspeksi->delete();
 
+            return back()->with(
+                'success',
+                'Data inspeksi berhasil dihapus'
+            );
         } catch (\Throwable $e) {
 
             Log::error('DELETE INSPEKSI ERROR', [
-                'msg' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'line'    => $e->getLine(),
             ]);
 
             return back()->withErrors([
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CETAK PDF
+    |--------------------------------------------------------------------------
+    */
+    public function cetakPdf($id)
+    {
+        $inspeksi = Inspeksi::with('ruangan')
+            ->findOrFail($id);
+
+        $subUraian = SubUraian::with('uraian')
+            ->get();
+
+        $pdf = Pdf::loadView('inspeksi.pdf', [
+            'inspeksi'  => $inspeksi,
+            'jawaban'   => $inspeksi->jawaban ?? [],
+            'subUraian' => $subUraian,
+        ]);
+
+        return $pdf->download('laporan-inspeksi.pdf');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDASI
+    |--------------------------------------------------------------------------
+    */
+    private function validateData(Request $request)
+    {
+        return $request->validate([
+
+            'tanggal' => [
+                'required',
+                'date'
+            ],
+
+            'ruangan_id' => [
+                'required',
+                'exists:ruangans,id'
+            ],
+
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROSES JAWABAN
+    |--------------------------------------------------------------------------
+    */
+    private function prosesJawaban(Request $request)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL SEMUA ID SUB URAIAN
+        |--------------------------------------------------------------------------
+        */
+        $subUraianIds = SubUraian::pluck('id')->toArray();
+
+        /*
+        |--------------------------------------------------------------------------
+        | INPUT JAWABAN DARI FORM
+        |--------------------------------------------------------------------------
+        */
+        $input = $request->input('jawaban', []);
+
+        $jawaban = [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALISASI JAWABAN
+        |--------------------------------------------------------------------------
+        */
+        foreach ($subUraianIds as $id) {
+
+            $value = $input[$id] ?? 'Tidak';
+
+            /*
+            |--------------------------------------------------------------------------
+            | NORMALISASI VALUE
+            |--------------------------------------------------------------------------
+            */
+            $value = strtolower(trim($value));
+
+            if (
+                $value === 'baik' ||
+                $value === 'ya' ||
+                $value === 'yes' ||
+                $value === '1'
+            ) {
+                $jawaban[$id] = 'Baik';
+            } else {
+                $jawaban[$id] = 'Tidak';
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL SOAL
+        |--------------------------------------------------------------------------
+        */
+        $total = count($jawaban);
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG BAIK
+        |--------------------------------------------------------------------------
+        */
+        $baik = collect($jawaban)
+            ->filter(function ($item) {
+                return $item === 'Baik';
+            })
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG BURUK
+        |--------------------------------------------------------------------------
+        */
+        $buruk = $total - $baik;
+
+        /*
+        |--------------------------------------------------------------------------
+        | PERSENTASE
+        |--------------------------------------------------------------------------
+        */
+        $hasil = $total > 0
+            ? round(($baik / $total) * 100)
+            : 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS
+        |--------------------------------------------------------------------------
+        */
+        if ($hasil >= 85) {
+
+            $status = 'Sangat Baik';
+            $badge  = 'success';
+
+        } elseif ($hasil >= 70) {
+
+            $status = 'Baik';
+            $badge  = 'primary';
+
+        } elseif ($hasil >= 50) {
+
+            $status = 'Cukup';
+            $badge  = 'warning';
+
+        } else {
+
+            $status = 'Buruk';
+            $badge  = 'danger';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN
+        |--------------------------------------------------------------------------
+        */
+        return [
+            $jawaban,
+            $hasil,
+            $status,
+            $badge,
+            $baik,
+            $buruk,
+            $total
+        ];
     }
 }

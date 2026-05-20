@@ -6,7 +6,7 @@
 
 <div class="container-fluid">
 
-    {{-- ERROR DISPLAY --}}
+    {{-- ERROR --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Terjadi kesalahan:</strong>
@@ -18,16 +18,17 @@
         </div>
     @endif
 
-    {{-- SUCCESS (JIKA ADA) --}}
+    {{-- SUCCESS --}}
     @if (session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
         </div>
     @endif
 
-    <form action="{{ route('inspeksi.store') }}" method="POST" id="form-inspeksi">
+    <form action="{{ route('inspeksi.store') }}" method="POST">
         @csrf
 
+        {{-- ================= FORM UTAMA ================= --}}
         <div class="card mb-4">
             <div class="card-body">
 
@@ -36,7 +37,7 @@
                 <div class="row">
 
                     <div class="col-md-4 mb-3">
-                        <label>Tanggal <span class="text-danger">*</span></label>
+                        <label>Tanggal *</label>
                         <input type="date"
                                name="tanggal"
                                class="form-control"
@@ -45,7 +46,7 @@
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label>Ruangan <span class="text-danger">*</span></label>
+                        <label>Ruangan *</label>
                         <select name="ruangan_id" class="form-control" required>
                             <option value="">-- Pilih Ruangan --</option>
                             @foreach($ruangan as $r)
@@ -57,19 +58,8 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label>Kategori <span class="text-danger">*</span></label>
-                        <select name="kategori_id" class="form-control" required>
-                            <option value="">-- Pilih Kategori --</option>
-                            @foreach($kategori as $k)
-                                <option value="{{ $k->id }}"
-                                    {{ old('kategori_id') == $k->id ? 'selected' : '' }}>
-                                    {{ $k->nama_kategori }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
+                    {{-- ❌ KATEGORI DIHAPUS --}}
+                    
                     <div class="col-md-12 mb-3">
                         <label>Catatan</label>
                         <input type="text"
@@ -103,53 +93,70 @@
             </div>
         </div>
 
-        {{-- CHECKLIST --}}
+        {{-- ================= CHECKLIST ================= --}}
         <div class="card mb-4">
             <div class="card-body">
 
                 <h5 class="mb-3">Checklist Inspeksi</h5>
 
-                <div class="table-responsive">
-                    <table class="table table-bordered">
+                @php $no = 1; @endphp
 
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Uraian</th>
-                                <th>Sub Uraian</th>
-                                <th>Jawaban</th>
-                            </tr>
-                        </thead>
+                {{-- 🔥 LOOP PER KATEGORI --}}
+                @foreach($kategoris as $kat)
+                    
+                    <h5 class="mt-4 text-primary">
+                        {{ strtoupper($kat->nama_kategori) }}
+                    </h5>
 
-                        <tbody>
-                            @php $no = 1; @endphp
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
 
-                            @foreach($subUraian as $item)
-                            <tr>
-                                <td>{{ $no++ }}</td>
-                                <td>{{ $item->uraian->nama_uraian ?? '-' }}</td>
-                                <td>{{ $item->nama_sub_uraian }}</td>
-                                <td>
-                                    <select name="jawaban[{{ $item->id }}]"
-                                            class="form-control">
-                                        <option value="">-- Pilih --</option>
-                                        <option value="Baik"
-                                            {{ old('jawaban.' . $item->id) == 'Baik' ? 'selected' : '' }}>
-                                            Baik
-                                        </option>
-                                        <option value="Tidak Baik"
-                                            {{ old('jawaban.' . $item->id) == 'Tidak Baik' ? 'selected' : '' }}>
-                                            Tidak Baik
-                                        </option>
-                                    </select>
-                                </td>
-                            </tr>
-                            @endforeach
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th>Uraian</th>
+                                    <th>Sub Uraian</th>
+                                    <th width="20%">Jawaban</th>
+                                </tr>
+                            </thead>
 
-                        </tbody>
+                            <tbody>
+                                @foreach($kat->subUraians as $item)
+                                <tr>
+                                    <td>{{ $no++ }}</td>
 
-                    </table>
-                </div>
+                                    <td>
+                                        {{ $item->uraian->nama_uraian ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $item->nama_sub_uraian }}
+                                    </td>
+
+                                    <td>
+                                        <select name="jawaban[{{ $item->id }}]"
+                                                class="form-control">
+                                            <option value="">-- Pilih --</option>
+
+                                            <option value="Baik"
+                                                {{ old('jawaban.' . $item->id) == 'Baik' ? 'selected' : '' }}>
+                                                Baik
+                                            </option>
+
+                                            <option value="Tidak Baik"
+                                                {{ old('jawaban.' . $item->id) == 'Tidak Baik' ? 'selected' : '' }}>
+                                                Tidak Baik
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                @endforeach
 
             </div>
         </div>

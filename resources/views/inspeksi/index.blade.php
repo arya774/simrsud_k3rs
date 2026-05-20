@@ -3,695 +3,267 @@
 @section('title', 'Form Inspeksi')
 
 @section('breadcrumb-title')
-
 <h3>Form Inspeksi</h3>
-
 @endsection
 
 @section('breadcrumb-items')
-
-<li class="breadcrumb-item">
-    Inspeksi
-</li>
-
-<li class="breadcrumb-item active">
-    Form Inspeksi
-</li>
-
+<li class="breadcrumb-item">Inspeksi</li>
+<li class="breadcrumb-item active">Form Inspeksi</li>
 @endsection
 
 @section('content')
 
-<style>
-
-    .inspection-card{
-        border:none;
-        border-radius:24px;
-        overflow:hidden;
-        box-shadow:0 4px 25px rgba(0,0,0,0.06);
-        background:#fff;
-    }
-
-    .inspection-header{
-        background:linear-gradient(135deg,#0d6efd,#5b8cff);
-        padding:30px;
-        color:white;
-    }
-
-    .inspection-header h3{
-        font-weight:700;
-        margin-bottom:6px;
-    }
-
-    .filter-box{
-        background:#f8fbff;
-        border:1px solid #e8eef8;
-        border-radius:20px;
-        padding:24px;
-        margin-bottom:30px;
-    }
-
-    .form-label{
-        font-weight:700;
-        margin-bottom:10px;
-        color:#1e293b;
-    }
-
-    .form-select,
-    .form-control{
-        height:56px;
-        border-radius:16px;
-        border:1px solid #dbe4f0;
-        font-size:15px;
-        padding-left:18px;
-    }
-
-    textarea.form-control{
-        height:auto;
-        padding-top:15px;
-    }
-
-    .kategori-card{
-        border:none;
-        border-radius:24px;
-        overflow:hidden;
-        box-shadow:0 2px 15px rgba(0,0,0,0.05);
-        margin-bottom:25px;
-    }
-
-    .kategori-header{
-        background:#f8fbff;
-        padding:24px;
-        border-bottom:1px solid #edf2f7;
-    }
-
-    .kategori-title{
-        margin:0;
-        color:#0d6efd;
-        font-weight:700;
-    }
-
-    .uraian-box{
-        border:1px solid #edf2f7;
-        border-radius:18px;
-        padding:22px;
-        margin-bottom:25px;
-    }
-
-    .uraian-title{
-        font-size:18px;
-        font-weight:700;
-        margin-bottom:20px;
-        color:#1e293b;
-    }
-
-    .table{
-        margin-bottom:0;
-    }
-
-    .table thead th{
-        background:#f8fafc;
-        border:none;
-        padding:16px;
-        font-weight:700;
-        color:#334155;
-    }
-
-    .table tbody td{
-        padding:18px 16px;
-        vertical-align:middle;
-        border-color:#eef2f7;
-    }
-
-    .question-text{
-        font-weight:600;
-        color:#334155;
-    }
-
-    .custom-radio{
-        width:24px !important;
-        height:24px !important;
-        cursor:pointer;
-        accent-color:#0d6efd;
-    }
-
-    .signature-card{
-        border:1px solid #e2e8f0;
-        border-radius:20px;
-        padding:20px;
-        background:#fafcff;
-    }
-
-    .signature-card canvas{
-        width:100%;
-        height:220px;
-        border-radius:16px;
-        border:2px dashed #cbd5e1;
-        background:#fff;
-        cursor:crosshair;
-        touch-action:none;
-    }
-
-    .btn-simpan{
-        height:56px;
-        border-radius:16px;
-        padding:0 35px;
-        font-weight:700;
-    }
-
-    .btn-reset{
-        border-radius:14px;
-        font-weight:600;
-    }
-
-</style>
-
 <div class="container-fluid">
-
-    <div class="row justify-content-center">
-
-        <div class="col-xl-12">
-
-            <div class="card inspection-card">
-
-                {{-- HEADER --}}
-                <div class="inspection-header">
-
-                    <h3>
-                        Form Inspeksi Rumah Sakit
-                    </h3>
-
-                    <span>
-                        Pilih kategori untuk menampilkan checklist inspeksi
-                    </span>
-
-                </div>
-
-                {{-- BODY --}}
-                <div class="card-body p-4">
-
-                    {{-- SUCCESS --}}
-                    @if(session('success'))
-
-                        <div class="alert alert-success">
-
-                            {{ session('success') }}
-
-                        </div>
-
-                    @endif
-
-                    {{-- ERROR --}}
-                    @if ($errors->any())
-
-                        <div class="alert alert-danger">
-
-                            <ul class="mb-0">
-
-                                @foreach ($errors->all() as $error)
-
-                                    <li>{{ $error }}</li>
-
-                                @endforeach
-
-                            </ul>
-
-                        </div>
-
-                    @endif
-
-                    <form action="{{ route('inspeksi.store') }}"
-                          method="POST">
-
-                        @csrf
-
-                        {{-- FILTER --}}
-                        <div class="filter-box">
-
-                            <div class="row">
-
-                                {{-- TANGGAL --}}
-                                <div class="col-lg-4 mb-3">
-
-                                    <label class="form-label">
-                                        Tanggal Inspeksi
-                                    </label>
-
-                                    <input type="date"
-                                           name="tanggal"
-                                           class="form-control"
-                                           value="{{ old('tanggal', date('Y-m-d')) }}"
-                                           required>
-
-                                </div>
-
-                                {{-- RUANGAN --}}
-                                <div class="col-lg-4 mb-3">
-
-                                    <label class="form-label">
-                                        Pilih Ruangan
-                                    </label>
-
-                                    <select name="ruangan_id"
-                                            class="form-select"
-                                            required>
-
-                                        <option value="">
-                                            -- Pilih Ruangan --
-                                        </option>
-
-                                        @foreach($ruangan as $item)
-
-                                            <option value="{{ $item->id }}">
-
-                                                {{ $item->nama_ruangan }}
-
-                                            </option>
-
-                                        @endforeach
-
-                                    </select>
-
-                                </div>
-
-                                {{-- KATEGORI --}}
-                                <div class="col-lg-4 mb-3">
-
-                                    <label class="form-label">
-                                        Pilih Kategori
-                                    </label>
-
-                                    <select id="kategoriSelect"
-                                            name="kategori_id"
-                                            class="form-select"
-                                            required>
-
-                                        <option value="">
-                                            -- Pilih Kategori --
-                                        </option>
-
-                                        @foreach($kategori as $item)
-
-                                            <option value="{{ $item->id }}">
-
-                                                {{ $item->nama_kategori }}
-
-                                            </option>
-
-                                        @endforeach
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        {{-- PERTANYAAN --}}
-                        @foreach($kategori as $kategoriItem)
-
-                            <div class="kategori-group d-none"
-                                 id="kategori-{{ $kategoriItem->id }}">
-
-                                <div class="kategori-card">
-
-                                    <div class="kategori-header">
-
-                                        <h4 class="kategori-title">
-
-                                            {{ $kategoriItem->nama_kategori }}
-
-                                        </h4>
-
-                                    </div>
-
-                                    <div class="card-body p-4">
-
-                                        @foreach($uraian->where('kategori_id', $kategoriItem->id) as $uraianItem)
-
-                                            <div class="uraian-box">
-
-                                                <h5 class="uraian-title">
-
-                                                    {{ $uraianItem->nama_uraian }}
-
-                                                </h5>
-
-                                                <div class="table-responsive">
-
-                                                    <table class="table align-middle">
-
-                                                        <thead>
-
-                                                            <tr>
-
-                                                                <th width="60%">
-                                                                    Pertanyaan Inspeksi
-                                                                </th>
-
-                                                                <th class="text-center">
-                                                                    Baik
-                                                                </th>
-
-                                                                <th class="text-center">
-                                                                    Tidak Baik
-                                                                </th>
-
-                                                            </tr>
-
-                                                        </thead>
-
-                                                        <tbody>
-
-                                                            @foreach($subUraian->where('uraian_id', $uraianItem->id) as $sub)
-
-                                                                <tr>
-
-                                                                    <td>
-
-                                                                        <div class="question-text">
-
-                                                                            {{ $sub->nama_sub_uraian }}
-
-                                                                        </div>
-
-                                                                    </td>
-
-                                                                    <td class="text-center">
-
-                                                                        <input class="form-check-input custom-radio"
-                                                                               type="radio"
-                                                                               name="jawaban[{{ $sub->id }}]"
-                                                                               value="Baik">
-
-                                                                    </td>
-
-                                                                    <td class="text-center">
-
-                                                                        <input class="form-check-input custom-radio"
-                                                                               type="radio"
-                                                                               name="jawaban[{{ $sub->id }}]"
-                                                                               value="Tidak Baik">
-
-                                                                    </td>
-
-                                                                </tr>
-
-                                                            @endforeach
-
-                                                        </tbody>
-
-                                                    </table>
-
-                                                </div>
-
-                                            </div>
-
-                                        @endforeach
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        @endforeach
-
-                        {{-- KETERANGAN --}}
-                        <div class="mb-4">
-
-                            <label class="form-label">
-                                Catatan Inspeksi
-                            </label>
-
-                            <textarea name="keterangan"
-                                      rows="5"
-                                      class="form-control"></textarea>
-
-                        </div>
-
-                        {{-- TTD --}}
-                        <div class="row">
-
-                            {{-- PETUGAS K3RS --}}
-                            <div class="col-lg-6 mb-4">
-
-                                <div class="signature-card">
-
-                                    <label class="form-label">
-                                        Nama Petugas K3RS
-                                    </label>
-
-                                    <input type="text"
-                                           name="nama_petugas_k3rs"
-                                           class="form-control mb-3"
-                                           placeholder="Masukkan nama petugas K3RS">
-
-                                    <label class="form-label">
-                                        Tanda Tangan Petugas K3RS
-                                    </label>
-
-                                    <canvas id="signature-pad-k3rs"></canvas>
-
-                                    <input type="hidden"
-                                           name="ttd_k3rs"
-                                           id="signature-k3rs">
-
-                                    <button type="button"
-                                            id="clear-k3rs"
-                                            class="btn btn-light btn-reset mt-3">
-
-                                        Hapus TTD
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                            {{-- PETUGAS RUANGAN --}}
-                            <div class="col-lg-6 mb-4">
-
-                                <div class="signature-card">
-
-                                    <label class="form-label">
-                                        Nama Petugas Ruangan
-                                    </label>
-
-                                    <input type="text"
-                                           name="nama_petugas_ruangan"
-                                           class="form-control mb-3"
-                                           placeholder="Masukkan nama petugas ruangan">
-
-                                    <label class="form-label">
-                                        Tanda Tangan Petugas Ruangan
-                                    </label>
-
-                                    <canvas id="signature-pad-ruangan"></canvas>
-
-                                    <input type="hidden"
-                                           name="ttd_ruangan"
-                                           id="signature-ruangan">
-
-                                    <button type="button"
-                                            id="clear-ruangan"
-                                            class="btn btn-light btn-reset mt-3">
-
-                                        Hapus TTD
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        {{-- BUTTON --}}
-                        <button type="submit"
-                                class="btn btn-primary btn-simpan">
-
-                            Simpan Inspeksi
-
-                        </button>
-
-                    </form>
-
-                </div>
-
-            </div>
-
-        </div>
+<div class="card shadow-sm border-0 rounded-4">
+
+<div class="card-header bg-primary text-white p-4">
+    <h4 class="mb-0 fw-bold">Form Inspeksi Rumah Sakit</h4>
+</div>
+
+<div class="card-body p-4">
+
+@if(session('success'))
+<div class="alert alert-success">{{ session('success') }}</div>
+@endif
+
+@if ($errors->any())
+<div class="alert alert-danger">
+    <ul class="mb-0">
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
+<form id="formInspeksi" action="{{ route('inspeksi.store') }}" method="POST">
+@csrf
+
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <label class="fw-bold">Tanggal</label>
+        <input type="date" name="tanggal" class="form-control"
+               value="{{ old('tanggal', date('Y-m-d')) }}" required>
+    </div>
+
+    <div class="col-md-4">
+        <label class="fw-bold">Ruangan</label>
+        <select name="ruangan_id" class="form-control" required>
+            <option value="">-- pilih --</option>
+            @foreach($ruangan as $r)
+            <option value="{{ $r->id }}">{{ $r->nama_ruangan }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <label class="fw-bold">Kategori</label>
+        <input type="text" class="form-control" value="Semua Kategori Ditampilkan" readonly>
+    </div>
+
+</div>
+
+{{-- KATEGORI --}}
+@foreach($kategoris as $kategori)
+
+<div class="card mb-4 border-0 shadow-sm">
+
+    <div class="card-header bg-light fw-bold text-primary d-flex justify-content-between align-items-center"
+         style="cursor:pointer"
+         onclick="toggleKategori({{ $kategori->id }})">
+
+        {{ $kategori->nama_kategori }}
+
+        <span id="icon-{{ $kategori->id }}" style="transition:0.3s;">
+            ▼
+        </span>
 
     </div>
 
+    <div class="card-body"
+         id="kategori-body-{{ $kategori->id }}"
+         style="display:none;">
+
+        @foreach($kategori->subUraians->groupBy('uraian_id') as $subs)
+
+        <div class="mb-4 p-3 border rounded-3">
+
+            <h6 class="fw-bold mb-3">
+                {{ optional($subs->first()->uraian)->nama_uraian }}
+            </h6>
+
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>Pertanyaan</th>
+                        <th class="text-center">Baik</th>
+                        <th class="text-center">Tidak</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach($subs as $sub)
+                    <tr>
+                        <td>{{ $sub->nama_sub_uraian }}</td>
+
+                        <td class="text-center">
+                            <input type="radio"
+                                   name="jawaban[{{ $sub->id }}]"
+                                   value="Baik"
+                                   checked>
+                        </td>
+
+                        <td class="text-center">
+                            <input type="radio"
+                                   name="jawaban[{{ $sub->id }}]"
+                                   value="Tidak Baik">
+                        </td>
+                    </tr>
+                    @endforeach
+
+                </tbody>
+            </table>
+
+        </div>
+
+        @endforeach
+
+    </div>
+
+</div>
+
+@endforeach
+
+<!-- CATATAN -->
+<div class="mb-3">
+    <label class="fw-bold">Catatan</label>
+    <textarea name="keterangan" class="form-control"></textarea>
+</div>
+
+<!-- NAMA PETUGAS -->
+<div class="row">
+
+    <div class="col-md-6">
+        <label>Nama Petugas K3RS</label>
+        <input type="text" name="nama_petugas_k3rs" class="form-control">
+    </div>
+
+    <div class="col-md-6">
+        <label>Nama Petugas Ruangan</label>
+        <input type="text" name="nama_petugas_ruangan" class="form-control">
+    </div>
+
+</div>
+
+<!-- TTD -->
+<div class="row mt-4">
+
+    <div class="col-md-6">
+        <label class="fw-bold">TTD Petugas K3RS</label>
+        <canvas id="ttd_k3rs" class="border rounded w-100" height="200"></canvas>
+        <input type="hidden" name="ttd_k3rs" id="ttd_k3rs_input">
+        <button type="button" class="btn btn-sm btn-danger mt-2"
+                onclick="clearPad(padK3RS)">Hapus</button>
+    </div>
+
+    <div class="col-md-6">
+        <label class="fw-bold">TTD Petugas Ruangan</label>
+        <canvas id="ttd_ruangan" class="border rounded w-100" height="200"></canvas>
+        <input type="hidden" name="ttd_ruangan" id="ttd_ruangan_input">
+        <button type="button" class="btn btn-sm btn-danger mt-2"
+                onclick="clearPad(padRuangan)">Hapus</button>
+    </div>
+
+</div>
+
+<br>
+
+<button class="btn btn-primary">Simpan</button>
+
+</form>
+
+</div>
+</div>
 </div>
 
 @endsection
 
 @section('script')
 
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
 <script>
 
-    /*
-    |--------------------------------------------------------------------------
-    | SHOW KATEGORI
-    |--------------------------------------------------------------------------
-    */
+// TOGGLE
+function toggleKategori(id){
+    let body = document.getElementById('kategori-body-' + id);
+    let icon = document.getElementById('icon-' + id);
 
-    const kategoriSelect = document.getElementById('kategoriSelect');
+    if(body.style.display === 'none'){
+        body.style.display = 'block';
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        body.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
 
-    const kategoriGroups = document.querySelectorAll('.kategori-group');
+// INIT CANVAS SMOOTH
+function initPad(canvasId){
+    const canvas = document.getElementById(canvasId);
 
-    kategoriSelect.addEventListener('change', function () {
-
-        kategoriGroups.forEach(group => {
-
-            group.classList.add('d-none');
-
-        });
-
-        if(this.value !== ''){
-
-            const selected = document.getElementById(
-                'kategori-' + this.value
-            );
-
-            if(selected){
-
-                selected.classList.remove('d-none');
-
-            }
-
-        }
-
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | SIGNATURE PAD
-    |--------------------------------------------------------------------------
-    */
-
-    function initSignature(canvasId, inputId, clearId){
-
-        const canvas = document.getElementById(canvasId);
-
-        const ctx = canvas.getContext('2d');
-
-        const hiddenInput = document.getElementById(inputId);
-
-        function resizeCanvas(){
-
-            canvas.width = canvas.offsetWidth;
-
-            canvas.height = 220;
-
-        }
-
-        resizeCanvas();
-
-        window.addEventListener('resize', resizeCanvas);
-
-        let isDrawing = false;
-
-        function getPosition(event){
-
-            const rect = canvas.getBoundingClientRect();
-
-            let x;
-            let y;
-
-            if(event.touches){
-
-                x = event.touches[0].clientX - rect.left;
-                y = event.touches[0].clientY - rect.top;
-
-            }else{
-
-                x = event.clientX - rect.left;
-                y = event.clientY - rect.top;
-
-            }
-
-            return { x, y };
-
-        }
-
-        function startDrawing(event){
-
-            isDrawing = true;
-
-            const pos = getPosition(event);
-
-            ctx.beginPath();
-
-            ctx.moveTo(pos.x, pos.y);
-
-        }
-
-        function draw(event){
-
-            if(!isDrawing) return;
-
-            event.preventDefault();
-
-            const pos = getPosition(event);
-
-            ctx.lineWidth = 2;
-
-            ctx.lineCap = 'round';
-
-            ctx.strokeStyle = '#000';
-
-            ctx.lineTo(pos.x, pos.y);
-
-            ctx.stroke();
-
-        }
-
-        function stopDrawing(){
-
-            if(!isDrawing) return;
-
-            isDrawing = false;
-
-            hiddenInput.value = canvas.toDataURL();
-
-        }
-
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseleave', stopDrawing);
-
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('touchend', stopDrawing);
-
-        document.getElementById(clearId)
-            .addEventListener('click', function(){
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                hiddenInput.value = '';
-
-            });
-
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = 200 * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
     }
 
-    initSignature(
-        'signature-pad-k3rs',
-        'signature-k3rs',
-        'clear-k3rs'
-    );
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
-    initSignature(
-        'signature-pad-ruangan',
-        'signature-ruangan',
-        'clear-ruangan'
-    );
+    return new SignaturePad(canvas, {
+        minWidth: 1,
+        maxWidth: 2.5,
+        throttle: 16,
+        velocityFilterWeight: 0.7,
+        penColor: "#000",
+    });
+}
+
+const padK3RS = initPad('ttd_k3rs');
+const padRuangan = initPad('ttd_ruangan');
+
+// CLEAR
+function clearPad(pad){
+    pad.clear();
+}
+
+// SUBMIT
+document.getElementById('formInspeksi').addEventListener('submit', function (e) {
+
+    if(padK3RS.isEmpty() || padRuangan.isEmpty()){
+        e.preventDefault();
+        alert('TTD wajib diisi!');
+        return;
+    }
+
+    // Background putih biar tidak transparan
+    function saveWithWhiteBg(pad){
+        const canvas = pad.canvas;
+        const ctx = canvas.getContext("2d");
+
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        return canvas.toDataURL("image/png");
+    }
+
+    document.getElementById('ttd_k3rs_input').value = saveWithWhiteBg(padK3RS);
+    document.getElementById('ttd_ruangan_input').value = saveWithWhiteBg(padRuangan);
+});
 
 </script>
 

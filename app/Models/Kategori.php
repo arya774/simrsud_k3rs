@@ -5,44 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Uraian;
+use App\Models\SubUraian;
 
 class Kategori extends Model
 {
     use HasFactory;
 
-    /*
-    |--------------------------------------------------------------------------
-    | TABLE
-    |--------------------------------------------------------------------------
-    */
-
     protected $table = 'kategoris';
-
-    /*
-    |--------------------------------------------------------------------------
-    | PRIMARY KEY
-    |--------------------------------------------------------------------------
-    */
 
     protected $primaryKey = 'id';
 
-    /*
-    |--------------------------------------------------------------------------
-    | MASS ASSIGNMENT
-    |--------------------------------------------------------------------------
-    */
-
     protected $fillable = [
-
         'nama_kategori',
-
     ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | TIMESTAMPS
-    |--------------------------------------------------------------------------
-    */
 
     public $timestamps = true;
 
@@ -52,8 +27,22 @@ class Kategori extends Model
     |--------------------------------------------------------------------------
     */
 
+    // ✅ Kategori → Uraian
     public function uraians()
     {
-        return $this->hasMany(Uraian::class);
+        return $this->hasMany(Uraian::class, 'kategori_id');
+    }
+
+    // ✅ Kategori → SubUraian (LEWAT Uraian)
+    public function subUraians()
+    {
+        return $this->hasManyThrough(
+            SubUraian::class,
+            Uraian::class,
+            'kategori_id', // foreign key di tabel uraian
+            'uraian_id',   // foreign key di tabel sub_uraian
+            'id',          // primary key kategori
+            'id'           // primary key uraian
+        );
     }
 }

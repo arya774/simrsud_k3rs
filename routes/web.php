@@ -15,7 +15,7 @@ use App\Http\Controllers\LaporanInspeksiController;
 
 /*
 |--------------------------------------------------------------------------
-| GUEST ROUTES
+| GUEST
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
@@ -26,7 +26,7 @@ Route::middleware('guest')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| AUTH ROUTES
+| AUTH
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -68,37 +68,27 @@ Route::middleware('auth')->group(function () {
         Route::put('/{inspeksi}', [InspeksiController::class, 'update'])->name('update');
 
         Route::delete('/{inspeksi}', [InspeksiController::class, 'destroy'])->name('destroy');
+
+        // ✅ FIX PDF ROUTE (INI YANG KAMU BUTUH)
+        Route::get('/{inspeksi}/pdf', [InspeksiController::class, 'cetakPdf'])
+            ->name('cetakPdf');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | LAPORAN INSPEKSI (FINAL FIXED)
+    | LAPORAN
     |--------------------------------------------------------------------------
     */
     Route::prefix('laporan')->name('laporan.')->group(function () {
 
-        // halaman laporan
-        Route::get('/inspeksi', [LaporanInspeksiController::class, 'index'])
-            ->name('inspeksi');
+        Route::get('/inspeksi', [LaporanInspeksiController::class, 'index'])->name('inspeksi');
 
-        // PDF EXPORT (INI WAJIB SAMA DENGAN CONTROLLER)
-        Route::get('/inspeksi/pdf', [LaporanInspeksiController::class, 'pdf'])
-            ->name('inspeksi.pdf');
+        Route::get('/inspeksi/pdf', [LaporanInspeksiController::class, 'pdf'])->name('inspeksi.pdf');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGOUT
-    |--------------------------------------------------------------------------
-    */
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
-/*
-|--------------------------------------------------------------------------
-| FALLBACK
-|--------------------------------------------------------------------------
-*/
 Route::fallback(function () {
     return redirect()->route('login');
 });
