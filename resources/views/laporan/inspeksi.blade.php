@@ -4,24 +4,74 @@
 
 @section('content')
 
+<style>
+
+    .filter-header{
+        background:linear-gradient(90deg,#6c63ff,#6f4ef2);
+    }
+
+    .kategori-wrap{
+        display:flex;
+        flex-wrap:wrap;
+        gap:6px;
+        max-width:350px;
+    }
+
+    .kategori-badge{
+        background:#6c63ff;
+        color:white;
+        border-radius:30px;
+        padding:6px 12px;
+        font-size:11px;
+        font-weight:600;
+        white-space:nowrap;
+    }
+
+    .hasil-badge{
+        min-width:65px;
+        font-size:13px;
+        padding:6px 12px;
+        border-radius:20px;
+    }
+
+    .table thead th{
+        background:#f8f9fc;
+        font-weight:700;
+        color:#334155;
+        border-bottom:2px solid #e2e8f0;
+    }
+
+    .table tbody td{
+        vertical-align:middle;
+    }
+
+    .table tbody tr:hover{
+        background:#fafbff;
+        transition:.2s;
+    }
+
+</style>
+
+
 <div class="container-fluid">
 
-    {{-- PAGE TITLE --}}
+    {{-- TITLE --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Laporan Inspeksi</h2>
+            <h2 class="fw-bold mb-1">
+                Laporan Inspeksi
+            </h2>
             <p class="text-muted mb-0">
                 Kelola dan cetak laporan inspeksi rumah sakit
             </p>
         </div>
     </div>
 
-    {{-- CARD FILTER --}}
+
+    {{-- FILTER --}}
     <div class="card border-0 shadow-sm overflow-hidden mb-4">
 
-        {{-- HEADER CARD --}}
-        <div class="p-4 text-white"
-             style="background: linear-gradient(90deg,#6c63ff,#6f4ef2);">
+        <div class="p-4 text-white filter-header">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -35,15 +85,13 @@
                     </small>
                 </div>
 
-                <div>
-                    <i class="fas fa-file-alt fa-2x"></i>
-                </div>
+                <i class="fas fa-file-alt fa-2x"></i>
 
             </div>
 
         </div>
 
-        {{-- BODY --}}
+
         <div class="card-body">
 
             <form method="GET"
@@ -51,9 +99,7 @@
 
                 <div class="row">
 
-                    {{-- DARI --}}
                     <div class="col-md-3 mb-3">
-
                         <label class="form-label fw-semibold">
                             Dari Tanggal
                         </label>
@@ -62,12 +108,10 @@
                                name="dari"
                                value="{{ request('dari') }}"
                                class="form-control">
-
                     </div>
 
-                    {{-- SAMPAI --}}
-                    <div class="col-md-3 mb-3">
 
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-semibold">
                             Sampai Tanggal
                         </label>
@@ -76,12 +120,10 @@
                                name="sampai"
                                value="{{ request('sampai') }}"
                                class="form-control">
-
                     </div>
 
-                    {{-- RUANGAN --}}
-                    <div class="col-md-3 mb-3">
 
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-semibold">
                             Ruangan
                         </label>
@@ -105,12 +147,10 @@
                             @endforeach
 
                         </select>
-
                     </div>
 
-                    {{-- KATEGORI --}}
-                    <div class="col-md-3 mb-3">
 
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-semibold">
                             Kategori
                         </label>
@@ -134,12 +174,11 @@
                             @endforeach
 
                         </select>
-
                     </div>
 
                 </div>
 
-                {{-- BUTTON --}}
+
                 <div class="mt-2 d-flex gap-2">
 
                     <button type="submit"
@@ -148,7 +187,6 @@
 
                         <i class="fas fa-search"></i>
                         Filter
-
                     </button>
 
                     <a href="{{ route('laporan.inspeksi') }}"
@@ -156,7 +194,6 @@
 
                         <i class="fas fa-rotate-left"></i>
                         Reset
-
                     </a>
 
                     <a href="{{ route('laporan.inspeksi.pdf', request()->all()) }}"
@@ -164,7 +201,6 @@
 
                         <i class="fas fa-file-pdf"></i>
                         Cetak PDF
-
                     </a>
 
                 </div>
@@ -175,7 +211,8 @@
 
     </div>
 
-    {{-- TABLE CARD --}}
+
+    {{-- TABLE --}}
     <div class="card border-0 shadow-sm">
 
         <div class="card-body">
@@ -184,19 +221,43 @@
 
                 <table class="table align-middle">
 
-                    <thead style="background:#f8f9fc;">
+                    <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Tanggal</th>
-                            <th>Ruangan</th>
-                            <th>Kategori</th>
-                            <th class="text-center">Hasil</th>
+                            <th width="8%">No</th>
+                            <th width="18%">Tanggal</th>
+                            <th width="22%">Ruangan</th>
+                            <th width="35%">Kategori</th>
+                            <th width="17%" class="text-center">
+                                Hasil
+                            </th>
                         </tr>
                     </thead>
 
                     <tbody>
 
-                        @forelse($inspeksi as $i)
+                    @forelse($inspeksi as $i)
+
+                        @php
+                            $kategoriList = [];
+
+                            if(!empty($i->jawaban)){
+
+                                $jawabanIds = array_keys(
+                                    is_array($i->jawaban)
+                                    ? $i->jawaban
+                                    : json_decode($i->jawaban,true) ?? []
+                                );
+
+                                $kategoriList =
+                                    \App\Models\SubUraian::with('uraian.kategori')
+                                    ->whereIn('id',$jawabanIds)
+                                    ->get()
+                                    ->pluck('uraian.kategori.nama_kategori')
+                                    ->unique()
+                                    ->filter()
+                                    ->values();
+                            }
+                        @endphp
 
                         <tr>
 
@@ -214,41 +275,48 @@
 
                             <td>
 
-                                <span class="badge rounded-pill"
-                                      style="background:#6c63ff;">
+                                <div class="kategori-wrap">
 
-                                    {{ $i->kategori->nama_kategori ?? '-' }}
+                                    @forelse($kategoriList as $kat)
 
-                                </span>
+                                        <span class="kategori-badge">
+                                            {{ $kat }}
+                                        </span>
+
+                                    @empty
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
+                                    @endforelse
+
+                                </div>
 
                             </td>
 
                             <td class="text-center">
 
-                                <span class="badge bg-success">
-
+                                <span class="badge bg-success hasil-badge">
                                     {{ $i->hasil ?? 0 }}%
-
                                 </span>
 
                             </td>
 
                         </tr>
 
-                        @empty
+                    @empty
 
                         <tr>
-
                             <td colspan="5"
                                 class="text-center text-muted py-4">
 
                                 Tidak ada data laporan inspeksi
 
                             </td>
-
                         </tr>
 
-                        @endforelse
+                    @endforelse
 
                     </tbody>
 
