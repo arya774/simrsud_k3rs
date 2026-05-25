@@ -152,7 +152,7 @@
 
         @endforelse
 
-    </tbody>
+    </tbody> 
 
 </table>
 
