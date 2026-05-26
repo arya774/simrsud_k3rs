@@ -7,6 +7,8 @@ use App\Models\Inspeksi;
 use App\Models\Ruangan;
 use App\Models\Kategori;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class LaporanInspeksiController extends Controller
 {
@@ -26,7 +28,7 @@ class LaporanInspeksiController extends Controller
     }
 
     /**
-     * Export PDF laporan inspeksi
+     * Export PDF laporan inspeksi (🔥 UPGRADE DISINI)
      */
     public function pdf(Request $request)
     {
@@ -39,7 +41,47 @@ class LaporanInspeksiController extends Controller
 
         $pdf->setPaper('A4', 'landscape');
 
-        return $pdf->download('laporan-inspeksi.pdf');
+        /*
+        |--------------------------------------------------------------------------
+        | 🔥 GENERATE NAMA FILE DINAMIS
+        |--------------------------------------------------------------------------
+        */
+
+        // 📅 Format tanggal
+        $dari   = $request->dari 
+            ? Carbon::parse($request->dari)->format('Y-m-d') 
+            : null;
+
+        $sampai = $request->sampai 
+            ? Carbon::parse($request->sampai)->format('Y-m-d') 
+            : null;
+
+        // 🏥 Ambil nama ruangan
+        $namaRuangan = null;
+
+        if ($request->ruangan_id) {
+            $ruangan = Ruangan::find($request->ruangan_id);
+
+            $namaRuangan = $ruangan->nama_ruangan 
+                ?? $ruangan->nama 
+                ?? 'semua-ruangan';
+        }
+
+        // 🔥 FORMAT FINAL
+        $ruanganText = $namaRuangan 
+            ? strtoupper(Str::slug($namaRuangan, '-')) 
+            : 'SEMUA-RUANGAN';
+
+        // 📄 Susun nama file
+        if ($dari && $sampai) {
+            $fileName = "Laporan-Inspeksi-{$ruanganText}-{$dari}_sampai_{$sampai}.pdf";
+        } elseif ($dari) {
+            $fileName = "Laporan-Inspeksi-{$ruanganText}-{$dari}.pdf";
+        } else {
+            $fileName = "Laporan-Inspeksi-{$ruanganText}.pdf";
+        }
+
+        return $pdf->download($fileName);
     }
 
     /**

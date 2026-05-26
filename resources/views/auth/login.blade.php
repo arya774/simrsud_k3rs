@@ -533,7 +533,7 @@
 
             </div>
 
-            <h2>NAMA APLIKASI</h2>
+            <h2>K3RS</h2>
 
             <p>RSUD KOTA BOGOR</p>
 
@@ -582,27 +582,55 @@
             </div>
 
             <div class="form-group">
+<label>Password</label>
 
-                <label>Password</label>
+<div style="position:relative;">
 
-                <input
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="Masukkan password"
-                    required
-                >
+    <input
+        type="password"
+        name="password"
+        id="password"
+        class="form-control"
+        placeholder="Masukkan password"
+        required
+        style="padding-right:45px;"
+    >
 
-            </div>
+    <span id="togglePassword" style="
+        position:absolute;
+        right:15px;
+        top:50%;
+        transform:translateY(-50%);
+        cursor:pointer;
+        font-size:18px;
+    ">
+        👁️
+    </span>
 
+</div>
             <button type="submit" class="btn-login">
                 Masuk
             </button>
 
         </form>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
 
-    </div>
+    const password = document.getElementById("password");
+    const toggle = document.getElementById("togglePassword");
 
-</div>
+    toggle.addEventListener("click", function(){
 
+        if(password.type === "password"){
+            password.type = "text";
+            toggle.textContent = "🙈"; // icon berubah
+        } else {
+            password.type = "password";
+            toggle.textContent = "👁️";
+        }
+
+    });
+
+});
+</script>
 @endsection

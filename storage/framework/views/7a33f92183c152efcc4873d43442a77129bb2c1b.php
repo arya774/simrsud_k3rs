@@ -5,10 +5,24 @@
 
     <style>
         body{
-            font-family: DejaVu Sans, "Times New Roman", serif;
+            font-family: DejaVu Sans, sans-serif;
             font-size:10px;
-            margin:10px;
+            margin:15px;
             color:#000;
+        }
+
+        .title{
+            text-align:center;
+            font-size:16px;
+            font-weight:bold;
+            margin-bottom:10px;
+            letter-spacing:1px;
+        }
+
+        .subtitle{
+            text-align:center;
+            font-size:11px;
+            margin-bottom:15px;
         }
 
         table{
@@ -18,29 +32,40 @@
 
         th, td{
             border:1px solid #000;
-            padding:3px 5px;
+            padding:4px 6px;
             vertical-align:top;
         }
 
         th{
+            background:#f2f2f2;
             text-align:center;
             font-weight:bold;
         }
 
-        .center{ text-align:center; }
-
-        .kategori{
-            font-weight:bold;
-            background:#d9d9d9;
+        .no-border td{
+            border:none;
+            padding:3px;
         }
 
-        .uraian{ font-weight:bold; }
+        .header-box{
+            margin-bottom:10px;
+        }
 
-        .sub{ padding-left:15px; }
+        .kategori{
+            background:#d9d9d9;
+            font-weight:bold;
+        }
 
-        .ruang-header{
-            font-size:9px;
-            line-height:1.2;
+        .uraian{
+            font-weight:bold;
+        }
+
+        .sub{
+            padding-left:15px;
+        }
+
+        .center{
+            text-align:center;
         }
 
         .check{
@@ -53,20 +78,18 @@
             line-height:1.4;
         }
 
-        .header-box{
-            margin-bottom:10px;
+        .signature{
+            margin-top:30px;
         }
 
-        .header-box table td{
-            border:none;
-            padding:2px;
+        .signature img{
+            height:70px;
+            object-fit:contain;
         }
 
-        .title{
-            font-size:14px;
+        .signature-name{
+            margin-top:5px;
             font-weight:bold;
-            text-align:center;
-            margin-bottom:10px;
         }
     </style>
 </head>
@@ -90,13 +113,11 @@
     $noUraian = 1;
 ?>
 
-
-<div class="title">
-    FORM HASIL INSPEKSI
-</div>
+<div class="title">FORM HASIL INSPEKSI</div>
+<div class="subtitle">Sistem Inspeksi K3RS</div>
 
 <div class="header-box">
-    <table>
+    <table class="no-border">
         <tr>
             <td width="15%"><strong>Tanggal</strong></td>
             <td width="35%">: <?php echo e(\Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y')); ?></td>
@@ -115,24 +136,17 @@
     </table>
 </div>
 
-
 <table>
     <thead>
         <tr>
             <th rowspan="2" width="4%">No</th>
             <th rowspan="2">Uraian Inspeksi / Obyek Penilaian</th>
-
-            <th colspan="2" class="ruang-header">
-                Ruang:<br>
+            <th colspan="2">
                 <?php echo e($inspeksi->ruangan->nama_ruangan ?? '-'); ?>
 
             </th>
-
-            <th rowspan="2" width="20%">
-                Keterangan
-            </th>
+            <th rowspan="2" width="20%">Keterangan</th>
         </tr>
-
         <tr>
             <th width="6%">Ya</th>
             <th width="6%">Tidak</th>
@@ -140,12 +154,12 @@
     </thead>
 
     <tbody>
-
     <?php $__currentLoopData = $groupedKategori; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $namaKategori => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
         <tr>
             <td class="center kategori">
-                <?php echo e($alphabet[$loop->index]); ?>.
+                <?php echo e($alphabet[$loop->index]); ?>
+
             </td>
 
             <td colspan="4" class="kategori">
@@ -159,7 +173,6 @@
                 fn($x) => $x->uraian->nama_uraian ?? '-'
             );
         ?>
-
 
         <?php $__currentLoopData = $groupedUraian; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $namaUraian => $subItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
@@ -179,7 +192,6 @@
                 <td></td>
             </tr>
 
-
             <?php $__currentLoopData = $subItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                 <?php
@@ -190,9 +202,7 @@
 
                     $huruf = chr(97 + $index);
 
-                    $kategoriId = optional(
-                        optional($sub->uraian)->kategori
-                    )->id;
+                    $kategoriId = optional(optional($sub->uraian)->kategori)->id;
 
                     $catatan =
                         $catatanKategori[$kategoriId]
@@ -204,18 +214,17 @@
                     <td></td>
 
                     <td class="sub">
-                        <?php echo e($huruf); ?>.
-                        <?php echo e($sub->nama_sub_uraian); ?>
+                        <?php echo e($huruf); ?>. <?php echo e($sub->nama_sub_uraian); ?>
 
                     </td>
 
                     <td class="center check">
-                        <?php echo e($baik ? '✓' : ''); ?>
+                        <?php echo e($baik ? '✔' : ''); ?>
 
                     </td>
 
                     <td class="center check">
-                        <?php echo e($tidak ? '✓' : ''); ?>
+                        <?php echo e($tidak ? '✔' : ''); ?>
 
                     </td>
 
@@ -229,44 +238,46 @@
 
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
     </tbody>
 </table>
 
+<div class="signature">
+    <table class="no-border">
+        <tr>
+            <td class="center" width="50%">
+                Petugas K3RS
+                <br><br>
 
-<br><br>
+                <?php if(!empty($inspeksi->ttd_k3rs)): ?>
+                    <img src="<?php echo e($inspeksi->ttd_k3rs); ?>">
+                <?php else: ?>
+                    <br><br><br>
+                <?php endif; ?>
 
-<table style="border:none; margin-top:20px;">
-    <tr>
-        <td style="border:none; text-align:center; width:50%;">
-            Petugas K3RS
-            <br><br>
+                <div class="signature-name">
+                    <?php echo e($inspeksi->nama_petugas_k3rs ?? '-'); ?>
 
-            <?php if(!empty($inspeksi->ttd_k3rs)): ?>
-                <img src="<?php echo e($inspeksi->ttd_k3rs); ?>" width="100">
-            <?php else: ?>
-                <br><br><br>
-            <?php endif; ?>
+                </div>
+            </td>
 
-            <br>
-            <strong><?php echo e($inspeksi->nama_petugas_k3rs ?? '-'); ?></strong>
-        </td>
+            <td class="center" width="50%">
+                Petugas Ruangan
+                <br><br>
 
-        <td style="border:none; text-align:center; width:50%;">
-            Petugas Ruangan
-            <br><br>
+                <?php if(!empty($inspeksi->ttd_ruangan)): ?>
+                    <img src="<?php echo e($inspeksi->ttd_ruangan); ?>">
+                <?php else: ?>
+                    <br><br><br>
+                <?php endif; ?>
 
-            <?php if(!empty($inspeksi->ttd_ruangan)): ?>
-                <img src="<?php echo e($inspeksi->ttd_ruangan); ?>" width="100">
-            <?php else: ?>
-                <br><br><br>
-            <?php endif; ?>
+                <div class="signature-name">
+                    <?php echo e($inspeksi->nama_petugas_ruangan ?? '-'); ?>
 
-            <br>
-            <strong><?php echo e($inspeksi->nama_petugas_ruangan ?? '-'); ?></strong>
-        </td>
-    </tr>
-</table>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
 
 </body>
 </html><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/inspeksi/pdf.blade.php ENDPATH**/ ?>

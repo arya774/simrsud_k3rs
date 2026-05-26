@@ -5,10 +5,24 @@
 
     <style>
         body{
-            font-family: DejaVu Sans, "Times New Roman", serif;
+            font-family: DejaVu Sans, sans-serif;
             font-size:10px;
-            margin:10px;
+            margin:15px;
             color:#000;
+        }
+
+        .title{
+            text-align:center;
+            font-size:16px;
+            font-weight:bold;
+            margin-bottom:10px;
+            letter-spacing:1px;
+        }
+
+        .subtitle{
+            text-align:center;
+            font-size:11px;
+            margin-bottom:15px;
         }
 
         table{
@@ -18,29 +32,40 @@
 
         th, td{
             border:1px solid #000;
-            padding:3px 5px;
+            padding:4px 6px;
             vertical-align:top;
         }
 
         th{
+            background:#f2f2f2;
             text-align:center;
             font-weight:bold;
         }
 
-        .center{ text-align:center; }
-
-        .kategori{
-            font-weight:bold;
-            background:#d9d9d9;
+        .no-border td{
+            border:none;
+            padding:3px;
         }
 
-        .uraian{ font-weight:bold; }
+        .header-box{
+            margin-bottom:10px;
+        }
 
-        .sub{ padding-left:15px; }
+        .kategori{
+            background:#d9d9d9;
+            font-weight:bold;
+        }
 
-        .ruang-header{
-            font-size:9px;
-            line-height:1.2;
+        .uraian{
+            font-weight:bold;
+        }
+
+        .sub{
+            padding-left:15px;
+        }
+
+        .center{
+            text-align:center;
         }
 
         .check{
@@ -53,20 +78,18 @@
             line-height:1.4;
         }
 
-        .header-box{
-            margin-bottom:10px;
+        .signature{
+            margin-top:30px;
         }
 
-        .header-box table td{
-            border:none;
-            padding:2px;
+        .signature img{
+            height:70px;
+            object-fit:contain;
         }
 
-        .title{
-            font-size:14px;
+        .signature-name{
+            margin-top:5px;
             font-weight:bold;
-            text-align:center;
-            margin-bottom:10px;
         }
     </style>
 </head>
@@ -90,13 +113,11 @@
     $noUraian = 1;
 @endphp
 
-
-<div class="title">
-    FORM HASIL INSPEKSI
-</div>
+<div class="title">FORM HASIL INSPEKSI</div>
+<div class="subtitle">Sistem Inspeksi K3RS</div>
 
 <div class="header-box">
-    <table>
+    <table class="no-border">
         <tr>
             <td width="15%"><strong>Tanggal</strong></td>
             <td width="35%">: {{ \Carbon\Carbon::parse($inspeksi->tanggal)->format('d M Y') }}</td>
@@ -115,23 +136,16 @@
     </table>
 </div>
 
-
 <table>
     <thead>
         <tr>
             <th rowspan="2" width="4%">No</th>
             <th rowspan="2">Uraian Inspeksi / Obyek Penilaian</th>
-
-            <th colspan="2" class="ruang-header">
-                Ruang:<br>
+            <th colspan="2">
                 {{ $inspeksi->ruangan->nama_ruangan ?? '-' }}
             </th>
-
-            <th rowspan="2" width="20%">
-                Keterangan
-            </th>
+            <th rowspan="2" width="20%">Keterangan</th>
         </tr>
-
         <tr>
             <th width="6%">Ya</th>
             <th width="6%">Tidak</th>
@@ -139,12 +153,11 @@
     </thead>
 
     <tbody>
-
     @foreach($groupedKategori as $namaKategori => $items)
 
         <tr>
             <td class="center kategori">
-                {{ $alphabet[$loop->index] }}.
+                {{ $alphabet[$loop->index] }}
             </td>
 
             <td colspan="4" class="kategori">
@@ -157,7 +170,6 @@
                 fn($x) => $x->uraian->nama_uraian ?? '-'
             );
         @endphp
-
 
         @foreach($groupedUraian as $namaUraian => $subItems)
 
@@ -175,7 +187,6 @@
                 <td></td>
             </tr>
 
-
             @foreach($subItems as $index => $sub)
 
                 @php
@@ -186,9 +197,7 @@
 
                     $huruf = chr(97 + $index);
 
-                    $kategoriId = optional(
-                        optional($sub->uraian)->kategori
-                    )->id;
+                    $kategoriId = optional(optional($sub->uraian)->kategori)->id;
 
                     $catatan =
                         $catatanKategori[$kategoriId]
@@ -200,16 +209,15 @@
                     <td></td>
 
                     <td class="sub">
-                        {{ $huruf }}.
-                        {{ $sub->nama_sub_uraian }}
+                        {{ $huruf }}. {{ $sub->nama_sub_uraian }}
                     </td>
 
                     <td class="center check">
-                        {{ $baik ? '✓' : '' }}
+                        {{ $baik ? '✔' : '' }}
                     </td>
 
                     <td class="center check">
-                        {{ $tidak ? '✓' : '' }}
+                        {{ $tidak ? '✔' : '' }}
                     </td>
 
                     <td class="catatan">
@@ -221,44 +229,44 @@
 
         @endforeach
     @endforeach
-
     </tbody>
 </table>
 
+<div class="signature">
+    <table class="no-border">
+        <tr>
+            <td class="center" width="50%">
+                Petugas K3RS
+                <br><br>
 
-<br><br>
+                @if(!empty($inspeksi->ttd_k3rs))
+                    <img src="{{ $inspeksi->ttd_k3rs }}">
+                @else
+                    <br><br><br>
+                @endif
 
-<table style="border:none; margin-top:20px;">
-    <tr>
-        <td style="border:none; text-align:center; width:50%;">
-            Petugas K3RS
-            <br><br>
+                <div class="signature-name">
+                    {{ $inspeksi->nama_petugas_k3rs ?? '-' }}
+                </div>
+            </td>
 
-            @if(!empty($inspeksi->ttd_k3rs))
-                <img src="{{ $inspeksi->ttd_k3rs }}" width="100">
-            @else
-                <br><br><br>
-            @endif
+            <td class="center" width="50%">
+                Petugas Ruangan
+                <br><br>
 
-            <br>
-            <strong>{{ $inspeksi->nama_petugas_k3rs ?? '-' }}</strong>
-        </td>
+                @if(!empty($inspeksi->ttd_ruangan))
+                    <img src="{{ $inspeksi->ttd_ruangan }}">
+                @else
+                    <br><br><br>
+                @endif
 
-        <td style="border:none; text-align:center; width:50%;">
-            Petugas Ruangan
-            <br><br>
-
-            @if(!empty($inspeksi->ttd_ruangan))
-                <img src="{{ $inspeksi->ttd_ruangan }}" width="100">
-            @else
-                <br><br><br>
-            @endif
-
-            <br>
-            <strong>{{ $inspeksi->nama_petugas_ruangan ?? '-' }}</strong>
-        </td>
-    </tr>
-</table>
+                <div class="signature-name">
+                    {{ $inspeksi->nama_petugas_ruangan ?? '-' }}
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
 
 </body>
 </html>
