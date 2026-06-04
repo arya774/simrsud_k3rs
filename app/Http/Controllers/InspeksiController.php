@@ -6,7 +6,6 @@ use App\Models\Inspeksi;
 use App\Models\Kategori;
 use App\Models\Ruangan;
 use App\Models\SubUraian;
-use App\Models\Uraian; // ✅ TAMBAHAN
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,9 +23,11 @@ class InspeksiController extends Controller
 
     public function riwayat()
     {
-        return view('inspeksi.riwayat', [
-            'inspeksis' => Inspeksi::with('ruangan')->latest()->get(),
-        ]);
+        $inspeksis = Inspeksi::with('ruangan')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('inspeksi.riwayat', compact('inspeksis'));
     }
 
     public function create()
@@ -34,14 +35,14 @@ class InspeksiController extends Controller
         return view('inspeksi.create', $this->getFormData());
     }
 
-    /**
-     * STORE
-     */
     public function store(Request $request)
     {
         return $this->handleTransaction(function () use ($request) {
 
-            $data = $this->validateStore($request);
+            $validated = $request->validate([
+                'tanggal'    => ['required', 'date'],
+                'ruangan_id' => ['required', 'exists:ruangans,id'],
+            ]);
 
             [
                 $jawaban,
@@ -53,17 +54,29 @@ class InspeksiController extends Controller
                 $total
             ] = $this->prosesJawaban($request);
 
-            Inspeksi::create($this->buildPayload(
-                $request,
-                $data,
-                $jawaban,
-                $hasil,
-                $status,
-                $badge,
-                $baik,
-                $buruk,
-                $total
-            ));
+            Inspeksi::create([
+                'tanggal' => $validated['tanggal'],
+                'ruangan_id' => $validated['ruangan_id'],
+
+                'nama_petugas_k3rs'     => $request->nama_petugas_k3rs,
+                'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
+
+                'ttd_k3rs'    => $request->ttd_k3rs,
+                'ttd_ruangan' => $request->ttd_ruangan,
+
+                'keterangan'        => $request->keterangan,
+                'catatan_kategori' => $request->catatan_kategori ?? [],
+
+                'jawaban' => $jawaban,
+
+                'hasil'  => $hasil,
+                'status' => $status,
+                'badge'  => $badge,
+
+                'jumlah_baik'  => $baik,
+                'jumlah_buruk' => $buruk,
+                'total_soal'   => $total,
+            ]);
 
             return redirect()->route('inspeksi.riwayat')
                 ->with('success', 'Inspeksi berhasil disimpan');
@@ -87,15 +100,15 @@ class InspeksiController extends Controller
         ]);
     }
 
-    /**
-     * 🔒 UPDATE → TANGGAL DIKUNCI
-     */
     public function update(Request $request, $id)
     {
         return $this->handleTransaction(function () use ($request, $id) {
 
-            $data = $this->validateUpdate($request);
             $inspeksi = Inspeksi::findOrFail($id);
+
+            $validated = $request->validate([
+                'ruangan_id' => ['required', 'exists:ruangans,id'],
+            ]);
 
             [
                 $jawaban,
@@ -107,23 +120,33 @@ class InspeksiController extends Controller
                 $total
             ] = $this->prosesJawaban($request);
 
-            // ✅ KUNCI TANGGAL (ANTI DIUBAH)
-            $data['tanggal'] = $inspeksi->tanggal;
+            $inspeksi->update([
+                'tanggal' => $inspeksi->tanggal,
 
-            $inspeksi->update($this->buildPayload(
-                $request,
-                $data,
-                $jawaban,
-                $hasil,
-                $status,
-                $badge,
-                $baik,
-                $buruk,
-                $total
-            ));
+                'ruangan_id' => $validated['ruangan_id'],
+
+                'nama_petugas_k3rs'     => $request->nama_petugas_k3rs,
+                'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
+
+                'ttd_k3rs'    => $request->ttd_k3rs,
+                'ttd_ruangan' => $request->ttd_ruangan,
+
+                'keterangan'        => $request->keterangan,
+                'catatan_kategori' => $request->catatan_kategori ?? [],
+
+                'jawaban' => $jawaban,
+
+                'hasil'  => $hasil,
+                'status' => $status,
+                'badge'  => $badge,
+
+                'jumlah_baik'  => $baik,
+                'jumlah_buruk' => $buruk,
+                'total_soal'   => $total,
+            ]);
 
             return redirect()->route('inspeksi.riwayat')
-                ->with('success', 'Data berhasil diupdate (tanggal tidak berubah)');
+                ->with('success', 'Data berhasil diupdate');
         });
     }
 
@@ -132,10 +155,9 @@ class InspeksiController extends Controller
         try {
             Inspeksi::findOrFail($id)->delete();
 
-            return back()->with('success', 'Data inspeksi berhasil dihapus');
+            return back()->with('success', 'Data berhasil dihapus');
         } catch (\Throwable $e) {
             Log::error('DELETE ERROR', ['message' => $e->getMessage()]);
-
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
@@ -157,51 +179,6 @@ class InspeksiController extends Controller
         return $pdf->download("Laporan-Inspeksi-{$ruangan}-{$tanggal}.pdf");
     }
 
-    /* =========================
-     * HELPER
-     * ========================= */
-
-    private function validateStore(Request $request)
-    {
-        return $request->validate([
-            'tanggal'    => ['required', 'date'],
-            'ruangan_id' => ['required', 'exists:ruangans,id'],
-        ]);
-    }
-
-    private function validateUpdate(Request $request)
-    {
-        return $request->validate([
-            'ruangan_id' => ['required', 'exists:ruangans,id'],
-        ]);
-    }
-
-    private function buildPayload($request, $data, $jawaban, $hasil, $status, $badge, $baik, $buruk, $total)
-    {
-        return [
-            ...$data,
-
-            'nama_petugas_k3rs'     => $request->nama_petugas_k3rs,
-            'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
-
-            'ttd_k3rs'    => $request->ttd_k3rs,
-            'ttd_ruangan' => $request->ttd_ruangan,
-
-            'keterangan'        => $request->keterangan,
-            'catatan_kategori' => $request->catatan_kategori ?? [],
-
-            'jawaban' => $jawaban,
-
-            'hasil'  => $hasil,
-            'status' => $status,
-            'badge'  => $badge,
-
-            'jumlah_baik'  => $baik,
-            'jumlah_buruk' => $buruk,
-            'total_soal'   => $total,
-        ];
-    }
-
     private function handleTransaction($callback)
     {
         DB::beginTransaction();
@@ -214,26 +191,22 @@ class InspeksiController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            Log::error('TRANSACTION ERROR', [
+            Log::error('ERROR', [
                 'message' => $e->getMessage(),
-                'line'    => $e->getLine(),
+                'line' => $e->getLine()
             ]);
 
             return back()->withInput()->withErrors([
-                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'error' => $e->getMessage()
             ]);
         }
     }
 
-    /**
-     * ✅ FIX UTAMA DI SINI
-     */
     private function getFormData()
     {
         return [
-            'ruangan'  => Ruangan::all(),
-            'kategori' => Kategori::with('subUraians.uraian')->get(), // ✅ FIX
-            'uraian'   => Uraian::all(), // ✅ TAMBAHAN
+            'ruangan'   => Ruangan::all(),
+            'kategoris' => Kategori::with('subUraians.uraian')->get(),
         ];
     }
 
@@ -252,6 +225,9 @@ class InspeksiController extends Controller
         ];
     }
 
+    /**
+     * 🔥 FIX TOTAL DI SINI
+     */
     private function prosesJawaban(Request $request)
     {
         $subUraianIds = SubUraian::pluck('id');
@@ -261,14 +237,22 @@ class InspeksiController extends Controller
 
             $value = strtolower(trim($input[$id] ?? ''));
 
-            return [$id => in_array($value, ['baik', 'ya', 'yes', '1'])
-                ? 'Baik'
-                : 'Tidak'];
+            return [
+                $id => in_array($value, ['baik', 'ya', 'yes', '1'])
+                    ? 'Baik'
+                    : 'Tidak Baik'
+            ];
         });
 
         $total = $jawaban->count();
-        $baik  = $jawaban->where('Baik')->count();
-        $buruk = $total - $baik;
+
+        $baik = $jawaban->filter(function ($j) {
+            return $j === 'Baik';
+        })->count();
+
+        $buruk = $jawaban->filter(function ($j) {
+            return $j === 'Tidak Baik';
+        })->count();
 
         $hasil = $total > 0 ? round(($baik / $total) * 100, 2) : 0;
 

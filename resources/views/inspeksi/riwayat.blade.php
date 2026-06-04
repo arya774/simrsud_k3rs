@@ -14,232 +14,267 @@
 @section('content')
 
 <style>
-    .history-card{
-        border:none;
-        border-radius:24px;
-        overflow:hidden;
-        box-shadow:0 4px 25px rgba(0,0,0,0.06);
-        background:#fff;
-    }
+.history-card{
+    border:none;
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 4px 25px rgba(0,0,0,0.06);
+    background:#fff;
+}
 
-    .history-header{
-        background:linear-gradient(135deg,#0d6efd,#5b8cff);
-        padding:30px;
-        color:white;
-    }
+.history-header{
+    background:linear-gradient(135deg,#0d6efd,#5b8cff);
+    padding:30px;
+    color:white;
+}
 
-    .history-header h3{
-        font-weight:700;
-        margin-bottom:6px;
-    }
+.history-header h3{
+    font-weight:700;
+    margin-bottom:6px;
+}
 
-    .table thead th{
-        background:#f8fafc;
-        border:none;
-        padding:18px;
-        font-weight:700;
-        color:#334155;
-        white-space:nowrap;
-    }
+.table thead th{
+    background:#f8fafc;
+    border:none;
+    padding:18px;
+    font-weight:700;
+    color:#334155;
+    white-space:nowrap;
+}
 
-    .table tbody td{
-        padding:18px;
-        vertical-align:middle;
-        border-color:#eef2f7;
-        color:#334155;
-    }
+.table tbody td{
+    padding:18px;
+    vertical-align:middle;
+    border-color:#eef2f7;
+    color:#334155;
+}
 
-    .badge-custom{
-        background:#e8f1ff;
-        color:#0d6efd;
-        padding:8px 14px;
-        border-radius:12px;
-        font-weight:600;
-        font-size:13px;
-        display:inline-block;
-    }
+.badge-custom{
+    background:#e8f1ff;
+    color:#0d6efd;
+    padding:8px 14px;
+    border-radius:12px;
+    font-weight:600;
+    font-size:13px;
+}
 
-    .btn-detail{
-        border-radius:12px;
-        padding:8px 14px;
-        font-weight:600;
-    }
+.btn-detail{
+    border-radius:12px;
+    padding:8px 14px;
+    font-weight:600;
+}
 
-    .btn-edit{
-        border-radius:12px;
-        padding:8px 14px;
-        font-weight:600;
-        background:#facc15;
-        color:#000;
-        border:none;
-    }
+.btn-edit{
+    border-radius:12px;
+    padding:8px 14px;
+    font-weight:600;
+    background:#facc15;
+    color:#000;
+    border:none;
+}
 
-    .btn-delete{
-        border-radius:12px;
-        padding:8px 14px;
-        font-weight:600;
-        background:#ef4444;
-        color:#fff;
-        border:none;
-    }
+.btn-delete{
+    border-radius:12px;
+    padding:8px 14px;
+    font-weight:600;
+    background:#ef4444;
+    color:#fff;
+    border:none;
+}
 
-    .empty-box{
-        padding:60px 20px;
-        text-align:center;
-    }
+.empty-box{
+    padding:60px 20px;
+    text-align:center;
+}
 
-    .empty-title{
-        font-size:20px;
-        font-weight:700;
-        color:#334155;
-    }
+.empty-title{
+    font-size:20px;
+    font-weight:700;
+}
 
-    .empty-subtitle{
-        color:#64748b;
-        margin-top:8px;
-    }
+.empty-subtitle{
+    color:#64748b;
+}
+
+/* 🔥 SEARCH STYLE UPGRADE */
+.search-wrapper{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    max-width:500px;
+}
+
+.search-input{
+    border-radius:12px;
+    padding:10px 15px;
+    border:1px solid #e2e8f0;
+}
 
 </style>
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
+<div class="row">
+<div class="col-12">
 
-            <div class="card history-card">
+<div class="card history-card">
 
-                <div class="history-header">
-                    <h3>Riwayat Inspeksi</h3>
-                    <span>Seluruh data inspeksi yang sudah pernah dilakukan</span>
-                </div>
+<div class="history-header">
+    <h3>Riwayat Inspeksi</h3>
+    <span>Seluruh data inspeksi yang sudah pernah dilakukan</span>
+</div>
 
-                <div class="card-body p-4">
+<div class="card-body p-4">
 
-                    @if(session('success'))
-                        <div class="alert alert-success border-0 rounded-4 shadow-sm">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+@if(session('success'))
+<div class="alert alert-success border-0 rounded-4 shadow-sm">
+    {{ session('success') }}
+</div>
+@endif
 
-                    @if($inspeksis->count() > 0)
+@if($inspeksis->count() > 0)
 
-                        <div class="table-responsive">
+{{-- 🔍 SEARCH PRO --}}
+<div class="search-wrapper">
+    <input type="text" id="searchInput" class="form-control search-input"
+           placeholder="🔍 Cari data... tekan Enter">
 
-                            <table class="table align-middle">
+    <button class="btn btn-primary" onclick="searchTable()">Cari</button>
+    <button class="btn btn-secondary" onclick="resetTable()">Reset</button>
+</div>
 
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th>Ruangan</th>
-                                        <th>Petugas K3RS</th>
-                                        <th>Petugas Ruangan</th>
-                                        <th>Total Checklist</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
+<div class="table-responsive">
 
-                                <tbody>
+<table class="table align-middle" id="tableInspeksi">
 
-                                    @foreach($inspeksis as $item)
+<thead>
+<tr>
+    <th>No</th>
+    <th>Tanggal</th>
+    <th>Ruangan</th>
+    <th>Petugas K3RS</th>
+    <th>Petugas Ruangan</th>
+    <th>Total Checklist</th>
+    <th class="text-center">Aksi</th>
+</tr>
+</thead>
 
-                                        <tr>
+<tbody>
 
-                                            <td>{{ $loop->iteration }}</td>
+@foreach($inspeksis as $item)
 
-                                            <td>
-                                                <span class="badge-custom">
-                                                    {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
-                                                </span>
-                                            </td>
+<tr>
 
-                                            <td>
-                                                <strong>
-                                                    {{ $item->ruangan->nama_ruangan ?? '-' }}
-                                                </strong>
-                                            </td>
+<td>{{ $loop->iteration }}</td>
 
-                                            <td>
-                                                {{ $item->nama_petugas_k3rs ?? '-' }}
-                                            </td>
+<td>
+    <span class="badge-custom">
+        {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
+    </span>
+</td>
 
-                                            <td>
-                                                {{ $item->nama_petugas_ruangan ?? '-' }}
-                                            </td>
+<td>
+    <strong>{{ $item->ruangan->nama_ruangan ?? '-' }}</strong>
+</td>
 
-                                            <td>
-                                                @php
-                                                    $jumlahJawaban = is_array($item->jawaban)
-                                                        ? count($item->jawaban)
-                                                        : 0;
-                                                @endphp
+<td>{{ $item->nama_petugas_k3rs ?? '-' }}</td>
 
-                                                <span class="badge-custom">
-                                                    {{ $jumlahJawaban }} Checklist
-                                                </span>
-                                            </td>
+<td>{{ $item->nama_petugas_ruangan ?? '-' }}</td>
 
-                                            {{-- AKSI UPGRADE --}}
-                                            <td class="text-center">
+<td>
+    @php
+        $jumlahJawaban = is_array($item->jawaban) ? count($item->jawaban) : 0;
+    @endphp
 
-                                                <a href="{{ route('inspeksi.hasil', $item->id) }}"
-                                                   class="btn btn-sm btn-primary btn-detail">
-                                                    Detail
-                                                </a>
+    <span class="badge-custom">
+        {{ $jumlahJawaban }} Checklist
+    </span>
+</td>
 
-                                                <a href="{{ route('inspeksi.edit', $item->id) }}"
-                                                   class="btn btn-sm btn-edit">
-                                                    Edit
-                                                </a>
+<td class="text-center">
 
-                                                <form action="{{ route('inspeksi.destroy', $item->id) }}"
-                                                      method="POST"
-                                                      style="display:inline-block"
-                                                      onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+    <a href="{{ route('inspeksi.hasil', $item->id) }}"
+       class="btn btn-sm btn-primary btn-detail">
+        Detail
+    </a>
 
-                                                    @csrf
-                                                    @method('DELETE')
+    <a href="{{ route('inspeksi.edit', $item->id) }}"
+       class="btn btn-sm btn-edit">
+        Edit
+    </a>
 
-                                                    <button type="submit"
-                                                            class="btn btn-sm btn-delete">
-                                                        Hapus
-                                                    </button>
+    <form action="{{ route('inspeksi.destroy', $item->id) }}"
+          method="POST"
+          style="display:inline-block"
+          onsubmit="return confirm('Yakin ingin menghapus data ini?')">
 
-                                                </form>
+        @csrf
+        @method('DELETE')
 
-                                            </td>
+        <button type="submit" class="btn btn-sm btn-delete">
+            Hapus
+        </button>
+    </form>
 
-                                        </tr>
+</td>
 
-                                    @endforeach
+</tr>
 
-                                </tbody>
+@endforeach
 
-                            </table>
+</tbody>
 
-                        </div>
+</table>
 
-                    @else
+</div>
 
-                        <div class="empty-box">
+@else
 
-                            <div class="empty-title">
-                                Belum Ada Riwayat Inspeksi
-                            </div>
-
-                            <div class="empty-subtitle">
-                                Data inspeksi yang sudah disimpan akan muncul di halaman ini
-                            </div>
-
-                        </div>
-
-                    @endif
-
-                </div>
-
-            </div>
-
-        </div>
+<div class="empty-box">
+    <div class="empty-title">Belum Ada Riwayat Inspeksi</div>
+    <div class="empty-subtitle">
+        Data inspeksi yang sudah disimpan akan muncul di halaman ini
     </div>
 </div>
+
+@endif
+
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+{{-- 🔥 SCRIPT FINAL --}}
+<script>
+
+function searchTable() {
+    let value = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("#tableInspeksi tbody tr");
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? "" : "none";
+    });
+}
+
+function resetTable() {
+    document.getElementById("searchInput").value = "";
+    let rows = document.querySelectorAll("#tableInspeksi tbody tr");
+
+    rows.forEach(row => {
+        row.style.display = "";
+    });
+}
+
+// 🔥 ENTER TRIGGER
+document.getElementById("searchInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        searchTable();
+    }
+});
+
+</script>
 
 @endsection

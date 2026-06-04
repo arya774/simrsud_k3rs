@@ -16,41 +16,12 @@
     font-size:15px;
     margin-bottom:10px;
 }
-.sub-title{
-    font-weight:500;
-    color:#0f172a;
-    font-size:14px;
-}
 .kategori-block{
     display:none;
 }
 .table td{
     color:#334155;
     vertical-align:middle;
-}
-.signature-box{
-    border:2px dashed #cbd5e1;
-    border-radius:16px;
-    background:#fff;
-    height:220px;
-    position:relative;
-    overflow:hidden;
-}
-.signature-box canvas{
-    width:100% !important;
-    height:220px !important;
-}
-.ttd-preview{
-    margin-top:15px;
-}
-.ttd-preview img{
-    max-width:100%;
-    height:120px;
-    object-fit:contain;
-    border:1px solid #e2e8f0;
-    border-radius:12px;
-    padding:10px;
-    background:#fff;
 }
 </style>
 
@@ -86,6 +57,7 @@
                                value="{{ optional($inspeksi->tanggal)->format('Y-m-d') }}">
                     </div>
 
+                    {{-- RUANGAN --}}
                     <div class="col-md-4">
                         <label class="form-label">Ruangan</label>
                         <select name="ruangan_id" class="form-select">
@@ -97,10 +69,11 @@
                         </select>
                     </div>
 
+                    {{-- ✅ FIX DI SINI (pakai $kategoris) --}}
                     <div class="col-md-4">
                         <label class="form-label">Kategori</label>
                         <select name="kategori_id" id="kategoriSelect" class="form-select">
-                            @foreach($kategori as $k)
+                            @foreach($kategoris as $k)
                                 <option value="{{ $k->id }}" {{ $inspeksi->kategori_id == $k->id ? 'selected' : '' }}>
                                     {{ $k->nama_kategori }}
                                 </option>
@@ -117,34 +90,51 @@
             <div class="card-body">
                 <h5 class="mb-3 text-primary">Checklist Inspeksi</h5>
 
-                @foreach($kategori as $k)
+                @foreach($kategoris as $k)
                 <div class="kategori-block" id="kategori-{{ $k->id }}">
+
                     <div class="p-3 border rounded bg-light mb-3">
                         <div class="kategori-title">{{ $k->nama_kategori }}</div>
                     </div>
 
-                    @foreach($uraian->where('kategori_id', $k->id) as $u)
+                    @foreach($k->subUraians as $su)
                     <div class="mb-3 p-3 border rounded bg-white">
-                        <div class="uraian-title">{{ $u->nama_uraian }}</div>
+
+                        <div class="uraian-title">
+                            {{ $su->uraian->nama_uraian ?? '-' }}
+                        </div>
 
                         <table class="table table-sm">
-                            @foreach($subUraian->where('uraian_id', $u->id) as $s)
-                            @php
-                                $jawaban = $inspeksi->jawaban[$s->id] ?? 'Baik';
-                            @endphp
                             <tr>
-                                <td width="60%">{{ $s->nama_sub_uraian }}</td>
-                                <td>
-                                    <input type="radio" name="jawaban[{{ $s->id }}]" value="Baik" {{ $jawaban === 'Baik' ? 'checked' : '' }}> Baik
+                                <td width="60%">
+                                    {{ $su->nama_sub_uraian }}
                                 </td>
+
+                                @php
+                                    $jawaban = $inspeksi->jawaban[$su->id] ?? 'Baik';
+                                @endphp
+
                                 <td>
-                                    <input type="radio" name="jawaban[{{ $s->id }}]" value="Tidak Baik" {{ $jawaban === 'Tidak Baik' ? 'checked' : '' }}> Tidak Baik
+                                    <input type="radio"
+                                           name="jawaban[{{ $su->id }}]"
+                                           value="Baik"
+                                           {{ $jawaban === 'Baik' ? 'checked' : '' }}>
+                                    Baik
+                                </td>
+
+                                <td>
+                                    <input type="radio"
+                                           name="jawaban[{{ $su->id }}]"
+                                           value="Tidak Baik"
+                                           {{ $jawaban === 'Tidak Baik' ? 'checked' : '' }}>
+                                    Tidak Baik
                                 </td>
                             </tr>
-                            @endforeach
                         </table>
+
                     </div>
                     @endforeach
+
                 </div>
                 @endforeach
 
@@ -155,7 +145,9 @@
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <label class="form-label">Keterangan</label>
-                <textarea name="keterangan" class="form-control" rows="3">{{ $inspeksi->keterangan }}</textarea>
+                <textarea name="keterangan" class="form-control" rows="3">
+                    {{ $inspeksi->keterangan }}
+                </textarea>
             </div>
         </div>
 
@@ -165,11 +157,15 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label>Petugas K3RS</label>
-                        <input type="text" name="nama_petugas_k3rs" class="form-control" value="{{ $inspeksi->nama_petugas_k3rs }}">
+                        <input type="text" name="nama_petugas_k3rs"
+                               class="form-control"
+                               value="{{ $inspeksi->nama_petugas_k3rs }}">
                     </div>
                     <div class="col-md-6">
                         <label>Petugas Ruangan</label>
-                        <input type="text" name="nama_petugas_ruangan" class="form-control" value="{{ $inspeksi->nama_petugas_ruangan }}">
+                        <input type="text" name="nama_petugas_ruangan"
+                               class="form-control"
+                               value="{{ $inspeksi->nama_petugas_ruangan }}">
                     </div>
                 </div>
             </div>
@@ -183,8 +179,6 @@
     </form>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-
 <script>
 const select = document.getElementById('kategoriSelect');
 const blocks = document.querySelectorAll('.kategori-block');
@@ -195,10 +189,12 @@ function showKategori(id){
     if(target){ target.style.display = 'block'; }
 }
 
-showKategori(select.value);
-select.addEventListener('change', function () {
-    showKategori(this.value);
-});
+if(select){
+    showKategori(select.value);
+    select.addEventListener('change', function () {
+        showKategori(this.value);
+    });
+}
 </script>
 
 @endsection
