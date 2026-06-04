@@ -1,8 +1,8 @@
-@extends('layouts.dashboard.master')
 
-@section('title', 'Edit Inspeksi')
 
-@section('content')
+<?php $__env->startSection('title', 'Edit Inspeksi'); ?>
+
+<?php $__env->startSection('content'); ?>
 
 <style>
 .kategori-title{
@@ -63,48 +63,50 @@
         </div>
     </div>
 
-    <form action="{{ route('inspeksi.update', $inspeksi->id) }}" method="POST">
-        @csrf
-        @method('PUT')
+    <form action="<?php echo e(route('inspeksi.update', $inspeksi->id)); ?>" method="POST">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
 
-        {{-- INFO --}}
+        
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <div class="row g-3">
 
-                    {{-- ✅ TANGGAL DIKUNCI --}}
+                    
                     <div class="col-md-4">
                         <label class="form-label">Tanggal</label>
 
                         <input type="date"
                                class="form-control"
-                               value="{{ optional($inspeksi->tanggal)->format('Y-m-d') }}"
+                               value="<?php echo e(optional($inspeksi->tanggal)->format('Y-m-d')); ?>"
                                readonly>
 
                         <input type="hidden"
                                name="tanggal"
-                               value="{{ optional($inspeksi->tanggal)->format('Y-m-d') }}">
+                               value="<?php echo e(optional($inspeksi->tanggal)->format('Y-m-d')); ?>">
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label">Ruangan</label>
                         <select name="ruangan_id" class="form-select">
-                            @foreach($ruangan as $r)
-                                <option value="{{ $r->id }}" {{ $inspeksi->ruangan_id == $r->id ? 'selected' : '' }}>
-                                    {{ $r->nama_ruangan }}
+                            <?php $__currentLoopData = $ruangan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($r->id); ?>" <?php echo e($inspeksi->ruangan_id == $r->id ? 'selected' : ''); ?>>
+                                    <?php echo e($r->nama_ruangan); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label">Kategori</label>
                         <select name="kategori_id" id="kategoriSelect" class="form-select">
-                            @foreach($kategori as $k)
-                                <option value="{{ $k->id }}" {{ $inspeksi->kategori_id == $k->id ? 'selected' : '' }}>
-                                    {{ $k->nama_kategori }}
+                            <?php $__currentLoopData = $kategori; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($k->id); ?>" <?php echo e($inspeksi->kategori_id == $k->id ? 'selected' : ''); ?>>
+                                    <?php echo e($k->nama_kategori); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
 
@@ -112,70 +114,70 @@
             </div>
         </div>
 
-        {{-- CHECKLIST --}}
+        
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h5 class="mb-3 text-primary">Checklist Inspeksi</h5>
 
-                @foreach($kategori as $k)
-                <div class="kategori-block" id="kategori-{{ $k->id }}">
+                <?php $__currentLoopData = $kategori; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <div class="kategori-block" id="kategori-<?php echo e($k->id); ?>">
                     <div class="p-3 border rounded bg-light mb-3">
-                        <div class="kategori-title">{{ $k->nama_kategori }}</div>
+                        <div class="kategori-title"><?php echo e($k->nama_kategori); ?></div>
                     </div>
 
-                    @foreach($uraian->where('kategori_id', $k->id) as $u)
+                    <?php $__currentLoopData = $uraian->where('kategori_id', $k->id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="mb-3 p-3 border rounded bg-white">
-                        <div class="uraian-title">{{ $u->nama_uraian }}</div>
+                        <div class="uraian-title"><?php echo e($u->nama_uraian); ?></div>
 
                         <table class="table table-sm">
-                            @foreach($subUraian->where('uraian_id', $u->id) as $s)
-                            @php
+                            <?php $__currentLoopData = $subUraian->where('uraian_id', $u->id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $jawaban = $inspeksi->jawaban[$s->id] ?? 'Baik';
-                            @endphp
+                            ?>
                             <tr>
-                                <td width="60%">{{ $s->nama_sub_uraian }}</td>
+                                <td width="60%"><?php echo e($s->nama_sub_uraian); ?></td>
                                 <td>
-                                    <input type="radio" name="jawaban[{{ $s->id }}]" value="Baik" {{ $jawaban === 'Baik' ? 'checked' : '' }}> Baik
+                                    <input type="radio" name="jawaban[<?php echo e($s->id); ?>]" value="Baik" <?php echo e($jawaban === 'Baik' ? 'checked' : ''); ?>> Baik
                                 </td>
                                 <td>
-                                    <input type="radio" name="jawaban[{{ $s->id }}]" value="Tidak Baik" {{ $jawaban === 'Tidak Baik' ? 'checked' : '' }}> Tidak Baik
+                                    <input type="radio" name="jawaban[<?php echo e($s->id); ?>]" value="Tidak Baik" <?php echo e($jawaban === 'Tidak Baik' ? 'checked' : ''); ?>> Tidak Baik
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </table>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
             </div>
         </div>
 
-        {{-- KETERANGAN --}}
+        
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <label class="form-label">Keterangan</label>
-                <textarea name="keterangan" class="form-control" rows="3">{{ $inspeksi->keterangan }}</textarea>
+                <textarea name="keterangan" class="form-control" rows="3"><?php echo e($inspeksi->keterangan); ?></textarea>
             </div>
         </div>
 
-        {{-- PETUGAS --}}
+        
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label>Petugas K3RS</label>
-                        <input type="text" name="nama_petugas_k3rs" class="form-control" value="{{ $inspeksi->nama_petugas_k3rs }}">
+                        <input type="text" name="nama_petugas_k3rs" class="form-control" value="<?php echo e($inspeksi->nama_petugas_k3rs); ?>">
                     </div>
                     <div class="col-md-6">
                         <label>Petugas Ruangan</label>
-                        <input type="text" name="nama_petugas_ruangan" class="form-control" value="{{ $inspeksi->nama_petugas_ruangan }}">
+                        <input type="text" name="nama_petugas_ruangan" class="form-control" value="<?php echo e($inspeksi->nama_petugas_ruangan); ?>">
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- SUBMIT --}}
+        
         <button class="btn btn-warning w-100">
             Update Inspeksi
         </button>
@@ -201,4 +203,5 @@ select.addEventListener('change', function () {
 });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/inspeksi/edit.blade.php ENDPATH**/ ?>

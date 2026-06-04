@@ -13,38 +13,34 @@ class Inspeksi extends Model
 
     /*
     |----------------------------------------------------------
-    | FILLABLE
+    | 🔒 FILLABLE (AMAN)
     |----------------------------------------------------------
     */
     protected $fillable = [
-
-        'tanggal',
-
+        // ❌ tanggal DIHAPUS dari fillable (biar tidak bisa diupdate)
         'ruangan_id',
-
         'kategori_id',
-
         'keterangan',
 
-        /*
-        |----------------------------------------------------------
-        | CATATAN PER KATEGORI
-        |----------------------------------------------------------
-        */
         'catatan_kategori',
 
         'nama_petugas_k3rs',
-
         'nama_petugas_ruangan',
 
         'ttd_k3rs',
-
         'ttd_ruangan',
 
         'jawaban',
-
         'hasil',
+    ];
 
+    /*
+    |----------------------------------------------------------
+    | 🔥 GUARDED (PROTECT TANGGAL)
+    |----------------------------------------------------------
+    */
+    protected $guarded = [
+        'tanggal'
     ];
 
     /*
@@ -53,25 +49,32 @@ class Inspeksi extends Model
     |----------------------------------------------------------
     */
     protected $casts = [
-
         'tanggal' => 'date',
-
-        /*
-        |----------------------------------------------------------
-        | AUTO CONVERT JSON
-        |----------------------------------------------------------
-        */
         'jawaban' => 'array',
-
         'catatan_kategori' => 'array',
-
         'hasil' => 'integer',
-
     ];
 
     /*
     |----------------------------------------------------------
-    | RELATION RUANGAN
+    | 🔒 AUTO LOCK TANGGAL SAAT UPDATE
+    |----------------------------------------------------------
+    */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updating(function ($model) {
+
+            // ❗ paksa tanggal tetap
+            $model->tanggal = $model->getOriginal('tanggal');
+
+        });
+    }
+
+    /*
+    |----------------------------------------------------------
+    | RELATION
     |----------------------------------------------------------
     */
     public function ruangan()
@@ -79,14 +82,21 @@ class Inspeksi extends Model
         return $this->belongsTo(Ruangan::class);
     }
 
-    /*
-    |----------------------------------------------------------
-    | RELATION KATEGORI
-    |----------------------------------------------------------
-    */
     public function kategori()
     {
         return $this->belongsTo(Kategori::class);
+    }
+
+    /*
+    |----------------------------------------------------------
+    | 🔥 FORMAT TANGGAL (OPSIONAL BAGUS BANGET)
+    |----------------------------------------------------------
+    */
+    public function getTanggalFormatAttribute()
+    {
+        return $this->tanggal
+            ? $this->tanggal->format('d-m-Y')
+            : '-';
     }
 
     /*
@@ -109,15 +119,10 @@ class Inspeksi extends Model
         $hasil = (int) ($this->hasil ?? 0);
 
         return match (true) {
-
             $hasil >= 85 => 'Sangat Baik',
-
             $hasil >= 70 => 'Baik',
-
             $hasil >= 50 => 'Cukup',
-
-            default => 'Kurang',
-
+            default      => 'Kurang',
         };
     }
 
@@ -131,41 +136,27 @@ class Inspeksi extends Model
         $hasil = (int) ($this->hasil ?? 0);
 
         return match (true) {
-
             $hasil >= 85 => 'success',
-
             $hasil >= 70 => 'primary',
-
             $hasil >= 50 => 'warning',
-
-            default => 'danger',
-
+            default      => 'danger',
         };
     }
 
     /*
     |----------------------------------------------------------
-    | NORMALIZE JAWABAN
+    | 🔥 NORMALIZE JAWABAN (ANTI ERROR JSON)
     |----------------------------------------------------------
     */
     private function normalizedJawaban(): array
     {
         $jawaban = $this->jawaban;
 
-        /*
-        |----------------------------------------------------------
-        | JIKA MASIH STRING JSON
-        |----------------------------------------------------------
-        */
         if (is_string($jawaban)) {
-
             $jawaban = json_decode($jawaban, true) ?? [];
-
         }
 
-        return is_array($jawaban)
-            ? $jawaban
-            : [];
+        return is_array($jawaban) ? $jawaban : [];
     }
 
     /*
@@ -186,13 +177,7 @@ class Inspeksi extends Model
     public function getTotalBaikAttribute()
     {
         return collect($this->normalizedJawaban())
-
-            ->filter(function ($value) {
-
-                return strtolower(trim($value)) == 'baik';
-
-            })
-
+            ->filter(fn($v) => strtolower(trim($v)) === 'baik')
             ->count();
     }
 
@@ -204,18 +189,16 @@ class Inspeksi extends Model
     public function getTotalTidakBaikAttribute()
     {
         return collect($this->normalizedJawaban())
+            ->filter(function ($v) {
 
-            ->filter(function ($value) {
+                $v = strtolower(trim($v));
 
-                $value = strtolower(trim($value));
-
-                return
-                    $value == 'tidak baik' ||
-                    $value == 'tidak_baik' ||
-                    $value == 'tidak';
-
+                return in_array($v, [
+                    'tidak',
+                    'tidak baik',
+                    'tidak_baik'
+                ]);
             })
-
             ->count();
     }
 

@@ -487,7 +487,7 @@
 
                 </div>
 
-            <?php endif; ?>
+            <?php endif; ?> 
 
         </td>
 
