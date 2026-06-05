@@ -449,17 +449,43 @@
                     </thead>
 
                     <tbody>
+@forelse($grouped as $namaKategori => $kategoriItems)
 
-                        @forelse($grouped as $namaKategori => $kategoriItems)
+    @php
+        $kategoriId = optional(
+            optional(
+                optional($kategoriItems->first())->uraian
+            )->kategori
+        )->id;
+    @endphp
 
-                            <tr class="kategori-row">
+    <tr class="kategori-row">
 
-                                <td colspan="3" class="kategori-title">
-                                    {{ $namaKategori }}
-                                </td>
+        <td colspan="3" class="kategori-title">
 
-                            </tr>
+            {{ $namaKategori }}
 
+            @if(
+                $kategoriId &&
+                isset($catatanKategori[$kategoriId]) &&
+                trim($catatanKategori[$kategoriId]) != ''
+            )
+
+                <div class="mt-3 p-3 border rounded bg-light">
+
+                    <strong>Catatan Kategori:</strong>
+
+                    <div class="mt-2">
+                        {{ $catatanKategori[$kategoriId] }}
+                    </div>
+
+                </div>
+
+            @endif 
+
+        </td>
+
+    </tr>
                             @php
 
                                 $groupUraian = $kategoriItems->groupBy(function ($item) {

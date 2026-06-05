@@ -10,78 +10,39 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class InspeksiController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
     public function index()
     {
-        $inspeksis = Inspeksi::with('ruangan')
-            ->latest()
-            ->get();
-
-        $ruangan = Ruangan::all();
-
-        $kategoris = Kategori::with([
-            'subUraians.uraian'
-        ])->get();
-
-        return view('inspeksi.index', compact(
-            'inspeksis',
-            'ruangan',
-            'kategoris'
-        ));
+        return view('inspeksi.index', $this->getFormData() + [
+            'inspeksis' => Inspeksi::with('ruangan')->latest()->get(),
+        ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RIWAYAT
-    |--------------------------------------------------------------------------
-    */
     public function riwayat()
     {
         $inspeksis = Inspeksi::with('ruangan')
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('inspeksi.riwayat', compact('inspeksis'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
     public function create()
     {
-        $ruangan = Ruangan::all();
-
-        $kategoris = Kategori::with([
-            'subUraians.uraian'
-        ])->get();
-
-        return view('inspeksi.create', compact(
-            'ruangan',
-            'kategoris'
-        ));
+        return view('inspeksi.create', $this->getFormData());
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | STORE
-    |--------------------------------------------------------------------------
-    */
     public function store(Request $request)
     {
-        DB::beginTransaction();
+        return $this->handleTransaction(function () use ($request) {
 
-        try {
-
-            $data = $this->validateData($request);
+            $validated = $request->validate([
+                'tanggal'    => ['required', 'date'],
+                'ruangan_id' => ['required', 'exists:ruangans,id'],
+            ]);
 
             [
                 $jawaban,
@@ -93,132 +54,61 @@ class InspeksiController extends Controller
                 $total
             ] = $this->prosesJawaban($request);
 
-            /*
-            |--------------------------------------------------------------------------
-            | CATATAN PER KATEGORI
-            |--------------------------------------------------------------------------
-            */
-            $catatanKategori = $request->catatan_kategori ?? [];
-
             Inspeksi::create([
+                'tanggal' => $validated['tanggal'],
+                'ruangan_id' => $validated['ruangan_id'],
 
-                // DATA
-                ...$data,
-
-                // PETUGAS
-                'nama_petugas_k3rs'    => $request->nama_petugas_k3rs,
+                'nama_petugas_k3rs'     => $request->nama_petugas_k3rs,
                 'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
 
-                // TTD
                 'ttd_k3rs'    => $request->ttd_k3rs,
                 'ttd_ruangan' => $request->ttd_ruangan,
 
-                // KETERANGAN UMUM
-                'keterangan' => $request->keterangan,
+                'keterangan'        => $request->keterangan,
+                'catatan_kategori' => $request->catatan_kategori ?? [],
 
-                // CATATAN PER KATEGORI
-                'catatan_kategori' => $catatanKategori,
-
-                // JAWABAN
                 'jawaban' => $jawaban,
 
-                // HASIL
                 'hasil'  => $hasil,
                 'status' => $status,
                 'badge'  => $badge,
 
-                // STATISTIK
                 'jumlah_baik'  => $baik,
                 'jumlah_buruk' => $buruk,
                 'total_soal'   => $total,
             ]);
 
-            DB::commit();
-
-            return redirect()
-                ->route('inspeksi.riwayat')
+            return redirect()->route('inspeksi.riwayat')
                 ->with('success', 'Inspeksi berhasil disimpan');
-
-        } catch (\Throwable $e) {
-
-            DB::rollBack();
-
-            Log::error('STORE INSPEKSI ERROR', [
-                'message' => $e->getMessage(),
-                'line'    => $e->getLine(),
-            ]);
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'error' => 'Gagal simpan data : ' . $e->getMessage()
-                ]);
-        }
+        });
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SHOW
-    |--------------------------------------------------------------------------
-    */
     public function show($id)
     {
-        $inspeksi = Inspeksi::with('ruangan')
-            ->findOrFail($id);
+        $inspeksi = Inspeksi::with('ruangan')->findOrFail($id);
 
-        $subUraian = SubUraian::with([
-            'uraian.kategori'
-        ])->get();
-
-        return view('inspeksi.hasil', [
-            'inspeksi'         => $inspeksi,
-            'jawaban'          => $inspeksi->jawaban ?? [],
-            'subUraian'        => $subUraian,
-            'catatanKategori'  => $inspeksi->catatan_kategori ?? [],
-        ]);
+        return view('inspeksi.hasil', $this->getDetailData($inspeksi));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | EDIT
-    |--------------------------------------------------------------------------
-    */
     public function edit($id)
     {
         $inspeksi = Inspeksi::findOrFail($id);
 
-        $subUraian = SubUraian::with([
-            'uraian.kategori'
-        ])->get();
-
-        $ruangan = Ruangan::all();
-
-        $kategoris = Kategori::with([
-            'subUraians.uraian'
-        ])->get();
-
-        return view('inspeksi.edit', compact(
-            'inspeksi',
-            'subUraian',
-            'ruangan',
-            'kategoris'
-        ));
+        return view('inspeksi.edit', $this->getFormData() + [
+            'inspeksi' => $inspeksi,
+            'subUraian' => $this->getSubUraian()
+        ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE
-    |--------------------------------------------------------------------------
-    */
     public function update(Request $request, $id)
     {
-        DB::beginTransaction();
-
-        try {
-
-            $data = $this->validateData($request);
+        return $this->handleTransaction(function () use ($request, $id) {
 
             $inspeksi = Inspeksi::findOrFail($id);
+
+            $validated = $request->validate([
+                'ruangan_id' => ['required', 'exists:ruangans,id'],
+            ]);
 
             [
                 $jawaban,
@@ -230,214 +120,155 @@ class InspeksiController extends Controller
                 $total
             ] = $this->prosesJawaban($request);
 
-            /*
-            |--------------------------------------------------------------------------
-            | CATATAN PER KATEGORI
-            |--------------------------------------------------------------------------
-            */
-            $catatanKategori = $request->catatan_kategori ?? [];
-
             $inspeksi->update([
+                'tanggal' => $inspeksi->tanggal,
 
-                // DATA
-                ...$data,
+                'ruangan_id' => $validated['ruangan_id'],
 
-                // PETUGAS
-                'nama_petugas_k3rs'    => $request->nama_petugas_k3rs,
+                'nama_petugas_k3rs'     => $request->nama_petugas_k3rs,
                 'nama_petugas_ruangan' => $request->nama_petugas_ruangan,
 
-                // TTD
                 'ttd_k3rs'    => $request->ttd_k3rs,
                 'ttd_ruangan' => $request->ttd_ruangan,
 
-                // KETERANGAN
-                'keterangan' => $request->keterangan,
+                'keterangan'        => $request->keterangan,
+                'catatan_kategori' => $request->catatan_kategori ?? [],
 
-                // CATATAN PER KATEGORI
-                'catatan_kategori' => $catatanKategori,
-
-                // JAWABAN
                 'jawaban' => $jawaban,
 
-                // HASIL
                 'hasil'  => $hasil,
                 'status' => $status,
                 'badge'  => $badge,
 
-                // STATISTIK
                 'jumlah_baik'  => $baik,
                 'jumlah_buruk' => $buruk,
                 'total_soal'   => $total,
             ]);
 
-            DB::commit();
-
-            return redirect()
-                ->route('inspeksi.riwayat')
-                ->with('success', 'Data inspeksi berhasil diupdate');
-
-        } catch (\Throwable $e) {
-
-            DB::rollBack();
-
-            Log::error('UPDATE INSPEKSI ERROR', [
-                'message' => $e->getMessage(),
-                'line'    => $e->getLine(),
-            ]);
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'error' => 'Gagal update data : ' . $e->getMessage()
-                ]);
-        }
+            return redirect()->route('inspeksi.riwayat')
+                ->with('success', 'Data berhasil diupdate');
+        });
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE
-    |--------------------------------------------------------------------------
-    */
     public function destroy($id)
     {
         try {
+            Inspeksi::findOrFail($id)->delete();
 
-            $inspeksi = Inspeksi::findOrFail($id);
+            return back()->with('success', 'Data berhasil dihapus');
+        } catch (\Throwable $e) {
+            Log::error('DELETE ERROR', ['message' => $e->getMessage()]);
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
 
-            $inspeksi->delete();
+    public function cetakPdf($id)
+    {
+        $inspeksi = Inspeksi::with('ruangan')->findOrFail($id);
 
-            return back()->with(
-                'success',
-                'Data inspeksi berhasil dihapus'
-            );
+        $pdf = Pdf::loadView('inspeksi.pdf', $this->getDetailData($inspeksi));
+
+        $ruangan = strtoupper(
+            $inspeksi->ruangan->nama_ruangan
+            ?? $inspeksi->ruangan->nama
+            ?? 'ruangan'
+        );
+
+        $tanggal = Carbon::parse($inspeksi->tanggal)->format('Y-m-d');
+
+        return $pdf->download("Laporan-Inspeksi-{$ruangan}-{$tanggal}.pdf");
+    }
+
+    private function handleTransaction($callback)
+    {
+        DB::beginTransaction();
+
+        try {
+            $result = $callback();
+            DB::commit();
+            return $result;
 
         } catch (\Throwable $e) {
+            DB::rollBack();
 
-            Log::error('DELETE INSPEKSI ERROR', [
+            Log::error('ERROR', [
                 'message' => $e->getMessage(),
-                'line'    => $e->getLine(),
+                'line' => $e->getLine()
             ]);
 
-            return back()->withErrors([
+            return back()->withInput()->withErrors([
                 'error' => $e->getMessage()
             ]);
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CETAK PDF
-    |--------------------------------------------------------------------------
-    */
-    public function cetakPdf($id)
+    private function getFormData()
     {
-        $inspeksi = Inspeksi::with('ruangan')
-            ->findOrFail($id);
+        return [
+            'ruangan'   => Ruangan::all(),
+            'kategoris' => Kategori::with('subUraians.uraian')->get(),
+        ];
+    }
 
-        $subUraian = SubUraian::with([
-            'uraian.kategori'
-        ])->get();
+    private function getSubUraian()
+    {
+        return SubUraian::with('uraian.kategori')->get();
+    }
 
-        $pdf = Pdf::loadView('inspeksi.pdf', [
+    private function getDetailData($inspeksi)
+    {
+        return [
             'inspeksi'        => $inspeksi,
             'jawaban'         => $inspeksi->jawaban ?? [],
-            'subUraian'       => $subUraian,
+            'subUraian'       => $this->getSubUraian(),
             'catatanKategori' => $inspeksi->catatan_kategori ?? [],
-        ]);
-
-        return $pdf->download('laporan-inspeksi.pdf');
+        ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDASI
-    |--------------------------------------------------------------------------
-    */
-    private function validateData(Request $request)
-    {
-        return $request->validate([
-
-            'tanggal' => [
-                'required',
-                'date'
-            ],
-
-            'ruangan_id' => [
-                'required',
-                'exists:ruangans,id'
-            ],
-
-        ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | PROSES JAWABAN
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * 🔥 FIX TOTAL DI SINI
+     */
     private function prosesJawaban(Request $request)
     {
-        $subUraianIds = SubUraian::pluck('id')->toArray();
-
+        $subUraianIds = SubUraian::pluck('id');
         $input = $request->input('jawaban', []);
 
-        $jawaban = [];
+        $jawaban = $subUraianIds->mapWithKeys(function ($id) use ($input) {
 
-        foreach ($subUraianIds as $id) {
+            $value = strtolower(trim($input[$id] ?? ''));
 
-            $value = $input[$id] ?? 'Tidak';
+            return [
+                $id => in_array($value, ['baik', 'ya', 'yes', '1'])
+                    ? 'Baik'
+                    : 'Tidak Baik'
+            ];
+        });
 
-            $value = strtolower(trim($value));
+        $total = $jawaban->count();
 
-            if (
-                $value === 'baik' ||
-                $value === 'ya' ||
-                $value === 'yes' ||
-                $value === '1'
-            ) {
+        $baik = $jawaban->filter(function ($j) {
+            return $j === 'Baik';
+        })->count();
 
-                $jawaban[$id] = 'Baik';
+        $buruk = $jawaban->filter(function ($j) {
+            return $j === 'Tidak Baik';
+        })->count();
 
-            } else {
+        $hasil = $total > 0 ? round(($baik / $total) * 100, 2) : 0;
 
-                $jawaban[$id] = 'Tidak';
-            }
-        }
+        $status = match (true) {
+            $hasil >= 85 => 'Sangat Baik',
+            $hasil >= 70 => 'Baik',
+            $hasil >= 50 => 'Cukup',
+            default      => 'Buruk',
+        };
 
-        $total = count($jawaban);
-
-        $baik = collect($jawaban)
-            ->filter(function ($item) {
-                return $item === 'Baik';
-            })
-            ->count();
-
-        $buruk = $total - $baik;
-
-        $hasil = $total > 0
-            ? round(($baik / $total) * 100)
-            : 0;
-
-        if ($hasil >= 85) {
-
-            $status = 'Sangat Baik';
-            $badge  = 'success';
-
-        } elseif ($hasil >= 70) {
-
-            $status = 'Baik';
-            $badge  = 'primary';
-
-        } elseif ($hasil >= 50) {
-
-            $status = 'Cukup';
-            $badge  = 'warning';
-
-        } else {
-
-            $status = 'Buruk';
-            $badge  = 'danger';
-        }
+        $badge = match ($status) {
+            'Sangat Baik' => 'success',
+            'Baik'        => 'primary',
+            'Cukup'       => 'warning',
+            default       => 'danger',
+        };
 
         return [
             $jawaban,

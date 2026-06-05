@@ -156,9 +156,9 @@
 
         <?php endif; ?>
 
-    </tbody>
+    </tbody> 
 
 </table>
 
 </body>
-</html><?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/laporan/pdf.blade.php ENDPATH**/ ?>
+</html> <?php /**PATH D:\Downloads\simrsud-starterpack-main\resources\views/laporan/pdf.blade.php ENDPATH**/ ?>
