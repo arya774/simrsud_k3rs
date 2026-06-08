@@ -453,18 +453,45 @@
                     </thead>
 
                     <tbody>
+<?php $__empty_1 = true; $__currentLoopData = $grouped; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $namaKategori => $kategoriItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
-                        <?php $__empty_1 = true; $__currentLoopData = $grouped; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $namaKategori => $kategoriItems): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+    <?php
+        $kategoriId = optional(
+            optional(
+                optional($kategoriItems->first())->uraian
+            )->kategori
+        )->id;
+    ?>
 
-                            <tr class="kategori-row">
+    <tr class="kategori-row">
 
-                                <td colspan="3" class="kategori-title">
-                                    <?php echo e($namaKategori); ?>
+        <td colspan="3" class="kategori-title">
 
-                                </td>
+            <?php echo e($namaKategori); ?>
 
-                            </tr>
 
+            <?php if(
+                $kategoriId &&
+                isset($catatanKategori[$kategoriId]) &&
+                trim($catatanKategori[$kategoriId]) != ''
+            ): ?>
+
+                <div class="mt-3 p-3 border rounded bg-light">
+
+                    <strong>Catatan Kategori:</strong>
+
+                    <div class="mt-2">
+                        <?php echo e($catatanKategori[$kategoriId]); ?>
+
+                    </div>
+
+                </div>
+
+            <?php endif; ?> 
+
+        </td>
+
+    </tr>
                             <?php
 
                                 $groupUraian = $kategoriItems->groupBy(function ($item) {

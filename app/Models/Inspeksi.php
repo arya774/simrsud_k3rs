@@ -114,7 +114,7 @@ class Inspeksi extends Model
 
             $hasil >= 70 => 'Baik',
 
-            $hasil >= 50 => 'Cukup',
+            $hasil >= 51 => 'Cukup',
 
             default => 'Kurang',
 
