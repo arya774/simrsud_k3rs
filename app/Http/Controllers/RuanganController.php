@@ -14,7 +14,7 @@ class RuanganController extends Controller
     */
     public function index()
     {
-        $data = Ruangan::latest()->paginate(10);
+       $data = Ruangan::latest()->get();
 
         return view('ruangan.index', compact('data'));
     }

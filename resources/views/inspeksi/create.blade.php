@@ -129,7 +129,8 @@
                                             <th width="5%">No</th>
                                             <th width="25%">Uraian</th>
                                             <th>Sub Uraian</th>
-                                            <th width="20%">Jawaban</th>
+                                           <th width="15%">Jawaban</th>
+                                        <th width="25%">Catatan</th>
                                         </tr>
                                     </thead>
 
