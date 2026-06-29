@@ -65,7 +65,7 @@ class InspeksiController extends Controller
                 'ttd_ruangan' => $request->ttd_ruangan,
 
                 'keterangan'        => $request->keterangan,
-                'catatan_kategori' => $request->catatan_kategori ?? [],
+                    
 
                 'jawaban' => $jawaban,
 
